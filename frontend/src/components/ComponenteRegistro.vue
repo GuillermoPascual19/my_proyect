@@ -8,10 +8,10 @@
           <input
             v-model="username"
             class="form-input"
-            type="email"
+            type="text"
             id="username"
             required
-            placeholder="Email"
+            placeholder="PepitoGrillo19"
           />
         </div>
         <div class="form-group">
@@ -83,9 +83,6 @@
         </div>
         <div class="form-group full-width">
           <p v-if="error" class="error">
-            Has introducido mal el usuario o la contraseña
-          </p>
-          <p v-if="password.length" class="error">
             Has introducido mal el usuario o la contraseña
           </p>
         </div>
@@ -178,12 +175,14 @@ export default {
         console.log(this.messageError);
       }
       //Email
+      const re =
+        /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       if (!this.email.value || this.email.length < 8) {
         this.messageError = "Email without enough length";
         console.log(this.messageError);
         return;
       }
-      if (!/[!@#$%^&*(),.?":{}|<>]/.test(this.email.value)) {
+      if (!re.test(this.email.value)) {
         this.messageError.value =
           "Email incorrect! must contain at least one special character";
         console.log(this.messageError);
@@ -257,29 +256,15 @@ export default {
   margin-bottom: 0.5rem;
 }
 
-.form-label-role {
-  border: none;
-}
-
 .form-input,
 .form-select {
   padding: 10px 15px;
   margin-bottom: 1rem;
   background: none;
-  border: 1px solid white; /* Cambia esto para el borde blanco */
+  border: none; /* Cambia esto para el borde blanco */
   color: white;
   border-radius: 5px; /* Opcional: añadir bordes redondeados */
-  box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
-}
-
-.form-select {
-  border: none; /* Elimina el borde del select */
-  background-color: rgba(
-    19,
-    35,
-    47,
-    0.9
-  ); /* Asegúrate de que el fondo coincida con el fondo del contenedor */
+  box-shadow: 0 4px 10px 4px rgba(19, 35, 47, 0.9);
 }
 
 .form-input:focus,

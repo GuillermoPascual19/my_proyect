@@ -2,6 +2,7 @@
   <div class="register">
     <h1 class="title">Sign In</h1>
     <form action class="form" @submit.prevent="register">
+      <p class="error">HOLAAAA HOME</p>
       <label class="form-label" for="#email">Email:</label>
       <input
         v-model="email"

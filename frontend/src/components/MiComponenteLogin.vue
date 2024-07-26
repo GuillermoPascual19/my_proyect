@@ -19,16 +19,6 @@
         id="password"
         placeholder="Password"
       />
-      <label class="form-label" for="#password-repeat"
-        >Repite la contraeña:</label
-      >
-      <input
-        v-model="passwordRepeat"
-        class="form-input"
-        type="password"
-        id="password-repeat"
-        placeholder="Password"
-      />
       <input class="form-submit" type="submit" value="Sign In" />
     </form>
     <p class="msg">
@@ -73,27 +63,15 @@ export default {
         this.error = true;
       }
     },
-    checkForm: function (e) {
-      if (this.email && this.password) {
-        return true;
+    validateNewData() {
+      //Password
+      if (!this.password.value || this.password.length < 8) {
+        this.messageError.value = "Password without enough length";
+        console.log(this.messageError);
+        return 1;
       }
 
-      this.errors = [];
-
-      if (!this.email) {
-        this.errors.push("El email es obligatorio.");
-      }
-      if (!this.password) {
-        this.errors.push("La contraseña es obligatorio.");
-      } else if (!this.validEmail(this.email)) {
-        this.errors.push("El correo electrónico debe ser válido.");
-      }
-
-      if (!this.errors.length) {
-        return true;
-      }
-
-      e.preventDefault();
+      //Email
     },
     validEmail(email) {
       const re =
@@ -129,7 +107,8 @@ export default {
   flex-direction: column;
   justify-content: center;
   width: 20%;
-  min-width: 350px;
+  min-width: 450px;
+  min-height: 450px;
   max-width: 100%;
   background: rgba(19, 35, 47, 0.9);
   border-radius: 5px;
