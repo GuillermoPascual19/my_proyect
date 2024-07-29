@@ -1,322 +1,138 @@
+<!-- src/components/Subjects.vue -->
 <template>
-  <div class="register">
-    <h1 class="title">Register</h1>
-    <form class="form" @submit.prevent="register">
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label" for="username">Username</label>
-          <input
-            v-model="username"
-            class="form-input"
-            type="email"
-            id="username"
-            required
-            placeholder="Email"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="nombre">Name</label>
-          <input
-            v-model="nombre"
-            class="form-input"
-            type="text"
-            id="nombre"
-            placeholder="Nombre"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="apellidos">Last Name</label>
-          <input
-            v-model="apellidos"
-            class="form-input"
-            type="text"
-            id="apellidos"
-            placeholder="Apellidos"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="email">Email</label>
-          <input
-            v-model="email"
-            class="form-input"
-            type="text"
-            id="email"
-            placeholder="Email"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="password">Password</label>
-          <input
-            v-model="password"
-            class="form-input"
-            type="password"
-            id="password"
-            placeholder="Password"
-            rules="required|min:6"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="password-repeat"
-            >Repite la contraseña:</label
-          >
-          <input
-            v-model="passwordRepeat"
-            class="form-input"
-            type="password"
-            id="password-repeat"
-            placeholder="Password"
-            rules="required|confirmed:password"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="role">Role</label>
-          <flowbite-themable :theme="theme">
-            <fwb-select
-              text="Role"
-              class="form-select"
-              v-model="selected"
-              required
-              :options="roles"
-            >
-            </fwb-select>
-          </flowbite-themable>
-        </div>
-        <div class="form-group full-width">
-          <p v-if="error" class="error">
-            Has introducido mal el usuario o la contraseña
-          </p>
-          <p v-if="password.length" class="error">
-            Has introducido mal el usuario o la contraseña
-          </p>
-        </div>
-        <div class="form-group full-width">
-          <input class="form-submit" type="submit" value="Register" />
-        </div>
-      </div>
-    </form>
+  <div class="fondo">
+    <h1>Asignaturas</h1>
+    <table class="subjects-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre de la Asignatura</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="subject in subjects" :key="subject.id">
+          <td>{{ subject.id }}</td>
+          <td>{{ subject.name }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="form-container">
+      <input
+        v-model="newSubject"
+        placeholder="Nueva Asignatura"
+        class="input-subject"
+      />
+      <button @click="addSubject" class="btn-add">Añadir Asignatura</button>
+    </div>
   </div>
 </template>
 
 <script>
-import auth from "@/logic/auth.js";
-import { FwbSelect } from "flowbite-vue";
 import { ref } from "vue";
 
 export default {
-  name: "ComponenteRegistro",
-  //Data
-  data: () => ({
-    username: "",
-    nombre: "",
-    email: "",
-    apellidos: "",
-    password: "",
-    passwordRepeat: "",
-    error: false,
-    messageError: "",
-    selected: ref(""),
-    roles: [
-      { value: "1", name: "Student" },
-      { value: "2", name: "Teacher" },
-    ],
-  }),
-  //Components
-  components: {
-    FwbSelect,
-  },
-  //Methods
-  methods: {
-    async register() {
-      try {
-        await auth.register(this.email, this.password);
-        this.$router.push("/");
-      } catch (error) {
-        this.error = true;
-        console.log(error);
+  setup() {
+    const subjects = ref([
+      { id: 1, name: "Matemáticas" },
+      { id: 2, name: "Ciencias" },
+      { id: 3, name: "Historia" },
+    ]);
+
+    const newSubject = ref("");
+
+    const addSubject = () => {
+      if (newSubject.value.trim() !== "") {
+        subjects.value.push({
+          id: subjects.value.length + 1,
+          name: newSubject.value.trim(),
+        });
+        newSubject.value = "";
       }
-    },
-    validateNewData() {
-      //Password
-      if (!this.password.value || this.password.length < 8) {
-        this.messageError.value = "Password without enough length";
-        console.log(this.messageError);
-        return;
-      }
-      if (!/[A-Z]/.test(this.password.value)) {
-        this.messageError.value =
-          "Password must contain at least one uppercase letter";
-        return;
-      }
-      if (!/[a-z]/.test(this.password.value)) {
-        this.messageError.value =
-          "Password must contain at least one lowercase letter";
-        return;
-      }
-      if (!/[0-9]/.test(this.password.value)) {
-        this.messageError.value = "Password must contain at least one number";
-        return;
-      }
-      if (!/[!@#$%^&*(),.?":{}|<>]/.test(this.password.value)) {
-        this.messageError.value =
-          "Password must contain at least one special character";
-        return;
-      }
-      //PasswordRepeat
-      if (
-        !this.passwordRepeat.value ||
-        this.passwordRepeat.length < 8 ||
-        this.password.match(this.passwordRepeat.value)
-      ) {
-        this.messageError.value = "Password without enough length";
-        console.log(this.messageError);
-        return;
-      }
-      //Name
-      if (!this.name.value || this.name.length < 1) {
-        this.error = true;
-        this.messageError.value = "Name must contain at least one character";
-        console.log(this.messageError);
-      }
-      //Email
-      if (!this.email.value || this.email.length < 8) {
-        this.messageError = "Email without enough length";
-        console.log(this.messageError);
-        return;
-      }
-      if (!/[!@#$%^&*(),.?":{}|<>]/.test(this.email.value)) {
-        this.messageError.value =
-          "Email incorrect! must contain at least one special character";
-        console.log(this.messageError);
-        return;
-      }
-      //Username
-      if (!this.username.value || this.username.length < 1) {
-        this.error = true;
-        this.messageError.value =
-          "Username must contain at least one character";
-        console.log(this.messageError);
-      }
-      //LastName
-      if (!this.apellidos.value || this.apellidos.length < 1) {
-        this.error = true;
-        this.messageError.value =
-          "Last Name must contain at least one character";
-        console.log(this.messageError);
-      }
-    },
-  },
-  props: {
-    msg: String,
+    };
+
+    return {
+      subjects,
+      newSubject,
+      addSubject,
+    };
   },
 };
 </script>
-<style lang="scss" scoped>
-.register {
-  padding: 2rem;
-}
 
-.title {
-  text-align: center;
-  font-family: "Helvetica", sans-serif;
-  font-size: 50px;
-  font-weight: 800;
-}
-
-.form {
+<style scoped>
+.fondo {
   margin: 3rem auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 40%;
-  min-width: 700px;
+  width: 20%;
+  min-width: 800px;
+  min-height: 500px;
   max-width: 100%;
   background: rgba(19, 35, 47, 0.9);
   border-radius: 5px;
   padding: 40px;
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
 }
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+body {
+  background-color: #f0f0f0;
+  color: #333;
+  font-family: Arial, sans-serif;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
+h1 {
+  color: #555;
 }
 
-.full-width {
-  grid-column: span 2;
+.subjects-table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.form-label {
-  margin-top: 1rem;
-  color: white;
-  margin-bottom: 0.5rem;
-}
-
-.form-input,
-.form-select {
-  padding: 10px 15px;
-  margin-bottom: 1rem;
-  background: none;
-  border: 1px solid white;
-  color: white;
-}
-
-.form-input:focus,
-.form-select:focus {
-  outline: 0;
-  border-color: #1ab188;
-}
-
-.form-submit {
-  background: #1ab188;
-  border: none;
-  color: white;
-  padding: 1rem 0;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.form-submit:hover {
-  background: #0b9185;
-}
-
-.error {
-  color: #ff4a96;
-}
-
-.dropdown-toggle {
-  background-color: #ca5a0f;
-  color: white;
+.subjects-table th,
+.subjects-table td {
   padding: 10px;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+.subjects-table th {
+  background-color: #e0e0e0;
+}
+
+.subjects-table tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.subjects-table tbody tr:nth-child(even) {
+  background-color: #f0f0f0;
+}
+
+.form-container {
+  margin-top: 20px;
+}
+
+.input-subject {
+  padding: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.btn-add {
+  padding: 5px 10px;
+  margin-left: 10px;
+  background-color: #4caf50;
+  color: white;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
-  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  background-color: white;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-}
-
-.dropdown-menu li {
-  padding: 12px 16px;
-  cursor: pointer;
-}
-
-.dropdown-menu li:hover {
-  background-color: #f1f1f1;
-}
-
-.remember {
-  text-align: center;
-  border-radius: 5px;
+.btn-add:hover {
+  background-color: #45a049;
 }
 </style>

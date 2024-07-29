@@ -1,7 +1,7 @@
 <template>
   <div class="register">
     <h1 class="title">Sign In</h1>
-    <form action class="form" @submit.prevent="register">
+    <form action class="form" @submit="submitForm">
       <label class="form-label" for="#email">Email:</label>
       <input
         v-model="email"
@@ -17,6 +17,7 @@
         class="form-input"
         type="password"
         id="password"
+        required
         placeholder="Password"
       />
       <input class="form-submit" type="submit" value="Sign In" />
@@ -57,7 +58,12 @@ export default {
         };
         auth.setUserLogged(user);
 
-        this.$router.push("/");
+        if (this.roles.value == "1") {
+          this.$router.push("/student");
+        } else {
+          this.$router.push("/teacher");
+        }
+        //this.$router.push("/");
       } catch (error) {
         console.log(error);
         this.error = true;
@@ -69,9 +75,10 @@ export default {
         this.messageError.value = "Password without enough length";
         console.log(this.messageError);
         return 1;
+      } else {
+        return 0;
       }
-
-      //Email
+      //Comprobar si esta en la base de datos
     },
     validEmail(email) {
       const re =
@@ -79,10 +86,11 @@ export default {
       return re.test(email);
     },
     submitForm() {
-      if (this.validEmail(this.email)) {
+      this.email.preventDefault();
+      if (this.validEmail(this.email) && this.validateNewData() != 1) {
         this.emailError = false;
         // Aquí puedes manejar el envío del formulario
-        alert("Email is valid!");
+        this.login();
       } else {
         this.emailError = true;
       }

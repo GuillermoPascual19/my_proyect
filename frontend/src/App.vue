@@ -2,6 +2,8 @@
   <nav>
     <router-link to="/">Home</router-link> |
     <router-link to="/login">Login</router-link> |
+    <router-link to="/home-student">Student</router-link> |
+    <router-link to="/home-teacher">Teacher</router-link> |
     <router-link to="/about">About</router-link>
   </nav>
   <router-view />

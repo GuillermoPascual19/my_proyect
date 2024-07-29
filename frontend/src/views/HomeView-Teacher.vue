@@ -3,6 +3,7 @@
     <h1 class="title">Register</h1>
     <form class="form" @submit.prevent="register">
       <div class="form-grid">
+        <p class="error">VIEW Teacher</p>
         <div class="form-group">
           <label class="form-label" for="username">Username</label>
           <input

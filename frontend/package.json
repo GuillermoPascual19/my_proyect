@@ -15,6 +15,7 @@
     "js-cookie": "^3.0.5",
     "sass": "^1.77.8",
     "sass-loader": "^14.2.1",
+    "utils": "^0.3.1",
     "vee-validate": "^4.13.2",
     "vue": "^3.4.34",
     "vue-class-component": "^8.0.0-0",
@@ -22,6 +23,7 @@
     "yup": "^1.4.0"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "@vue/cli-plugin-babel": "~5.0.0",

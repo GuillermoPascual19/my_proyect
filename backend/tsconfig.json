@@ -11,6 +11,6 @@
     "rootDir": "./src",
     "types": ["webpack-env"]
   },
-  "include": ["src/**/*", "sequelize.config.js"],
+  "include": ["src/**/*", "sequelize.config.js", "src/**/*.ts", "global.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

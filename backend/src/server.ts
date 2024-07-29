@@ -1,12 +1,9 @@
 import 'dotenv/config'
-//import app from './app';
 import sequelize from './config/database';
 import express, { Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import bodyParser from 'body-parser';
-
-const app = express();
-app.use(bodyParser.json());
+import app from './app';
 
 //-------------Recuperar contraseña del usuario------------------------------
 //
@@ -48,9 +45,11 @@ const transporter = nodemailer.createTransport({
 //------------------------Conectar el backend con la base de datos------------------------
 const PORT = process.env.PORT || 3000;
 
+
 const start = async () => {
     try {
         console.log("Start connection to db")
+        await sequelize.authenticate(); // Verifica la conexión a la base de datos
         await sequelize.sync();
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
@@ -60,4 +59,10 @@ const start = async () => {
     }
 };
 
-start();
+start().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+});
+
+
