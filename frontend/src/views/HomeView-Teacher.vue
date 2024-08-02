@@ -5,7 +5,7 @@
       <div class="form-grid">
         <p class="error">VIEW Teacher</p>
         <div class="form-group">
-          <label class="form-label" for="username">Username</label>
+          <label class="form-label">Username</label>
           <input
             v-model="username"
             class="form-input"
@@ -16,7 +16,7 @@
           />
         </div>
         <div class="form-group">
-          <label class="form-label" for="nombre">Name</label>
+          <label class="form-label">Name</label>
           <input
             v-model="nombre"
             class="form-input"
@@ -26,7 +26,7 @@
           />
         </div>
         <div class="form-group">
-          <label class="form-label" for="apellidos">Last Name</label>
+          <label class="form-label">Last Name</label>
           <input
             v-model="apellidos"
             class="form-input"
@@ -36,7 +36,7 @@
           />
         </div>
         <div class="form-group">
-          <label class="form-label" for="email">Email</label>
+          <label class="form-label">Email</label>
           <input
             v-model="email"
             class="form-input"
@@ -46,7 +46,7 @@
           />
         </div>
         <div class="form-group">
-          <label class="form-label" for="password">Password</label>
+          <label class="form-label">Password</label>
           <input
             v-model="password"
             class="form-input"
@@ -57,9 +57,7 @@
           />
         </div>
         <div class="form-group">
-          <label class="form-label" for="password-repeat"
-            >Repite la contraseña:</label
-          >
+          <label class="form-label">Repite la contraseña:</label>
           <input
             v-model="passwordRepeat"
             class="form-input"
@@ -70,7 +68,7 @@
           />
         </div>
         <div class="form-group">
-          <label class="form-label" for="role">Role</label>
+          <label class="form-label">Role</label>
           <flowbite-themable :theme="theme">
             <fwb-select
               text="Role"

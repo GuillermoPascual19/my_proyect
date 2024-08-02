@@ -1,10 +1,10 @@
 <template>
   <div class="register">
     <h1 class="title">Register</h1>
-    <form class="form" @submit.prevent="register">
+    <form class="form" @submit.prevent="registerUser">
       <div class="form-grid">
         <div class="form-group">
-          <label class="form-label" for="username">Username</label>
+          <label class="form-label">Username</label>
           <input
             v-model="username"
             class="form-input"
@@ -15,68 +15,71 @@
           />
         </div>
         <div class="form-group">
-          <label class="form-label" for="nombre">Name</label>
+          <label class="form-label">Name</label>
           <input
-            v-model="nombre"
+            v-model="name"
             class="form-input"
             type="text"
-            id="nombre"
+            id="name"
+            required
             placeholder="Nombre"
           />
         </div>
         <div class="form-group">
-          <label class="form-label" for="apellidos">Last Name</label>
+          <label class="form-label">Last Name</label>
           <input
-            v-model="apellidos"
+            v-model="surname"
             class="form-input"
             type="text"
             id="apellidos"
+            required
             placeholder="Apellidos"
           />
         </div>
         <div class="form-group">
-          <label class="form-label" for="email">Email</label>
+          <label class="form-label">Email</label>
           <input
             v-model="email"
             class="form-input"
             type="text"
             id="email"
+            required
             placeholder="Email"
           />
         </div>
         <div class="form-group">
-          <label class="form-label" for="password">Password</label>
+          <label class="form-label">Password</label>
           <input
             v-model="password"
             class="form-input"
             type="password"
             id="password"
+            required
             placeholder="Password"
             rules="required|min:6"
           />
         </div>
         <div class="form-group">
-          <label class="form-label" for="password-repeat"
-            >Repite la contraseña:</label
-          >
+          <label class="form-label">Repite la contraseña:</label>
           <input
             v-model="passwordRepeat"
             class="form-input"
             type="password"
             id="password-repeat"
+            required
             placeholder="Password"
             rules="required|confirmed:password"
           />
         </div>
         <div class="form-group">
-          <label class="form-label-role" for="role">Role</label>
+          <label class="form-label-role">Role</label>
           <flowbite-themable :theme="theme">
             <fwb-select
               text="Role"
               class="form-select"
               v-model="selected"
               required
-              :options="roles"
+              :options="rolesOpt"
             >
             </fwb-select>
           </flowbite-themable>
@@ -86,6 +89,9 @@
             Has introducido mal el usuario o la contraseña
           </p>
         </div>
+        <p v-if="error" class="error">
+          Has introducido mal el usuario o la contraseña
+        </p>
         <div class="form-group full-width">
           <input class="form-submit" type="submit" value="Register" />
         </div>
@@ -95,27 +101,29 @@
 </template>
 
 <script>
-import auth from "@/logic/auth.js";
 import { FwbSelect } from "flowbite-vue";
-import { ref } from "vue";
+//import { ref } from "vue";
+import authService from "../services/auth/auth.service";
 
 export default {
   name: "ComponenteRegistro",
   //Data
   data: () => ({
     username: "",
-    nombre: "",
+    name: "",
     email: "",
-    apellidos: "",
+    surname: "",
     password: "",
     passwordRepeat: "",
     error: false,
-    messageError: "",
-    selected: ref(""),
-    roles: [
+    accessToken: "3rhb23uydb238ry6g2429hrh",
+    selected: "",
+    rolesOpt: [
       { value: "1", name: "Student" },
       { value: "2", name: "Teacher" },
     ],
+    rol: "",
+    theme: "dark",
   }),
   //Components
   components: {
@@ -123,84 +131,96 @@ export default {
   },
   //Methods
   methods: {
-    async register() {
-      try {
-        await auth.register(this.email, this.password);
-        this.$router.push("/");
-      } catch (error) {
-        this.error = true;
-        console.log(error);
-      }
-    },
-    validateNewData() {
-      //Password
-      if (!this.password.value || this.password.length < 8) {
-        this.messageError.value = "Password without enough length";
-        console.log(this.messageError);
-        return;
-      }
-      if (!/[A-Z]/.test(this.password.value)) {
-        this.messageError.value =
-          "Password must contain at least one uppercase letter";
-        return;
-      }
-      if (!/[a-z]/.test(this.password.value)) {
-        this.messageError.value =
-          "Password must contain at least one lowercase letter";
-        return;
-      }
-      if (!/[0-9]/.test(this.password.value)) {
-        this.messageError.value = "Password must contain at least one number";
-        return;
-      }
-      if (!/[!@#$%^&*(),.?":{}|<>]/.test(this.password.value)) {
-        this.messageError.value =
-          "Password must contain at least one special character";
-        return;
-      }
-      //PasswordRepeat
+    async registerUser() {
+      console.log(this.username);
+      console.log(this.name);
+      console.log(this.surname);
+      console.log(this.email);
+      console.log(this.password);
+      console.log(this.passwordRepeat);
+      console.log(this.selected);
       if (
-        !this.passwordRepeat.value ||
-        this.passwordRepeat.length < 8 ||
-        this.password.match(this.passwordRepeat.value)
+        !this.username ||
+        !this.name ||
+        !this.surname ||
+        !this.email ||
+        !this.password ||
+        !this.selected
       ) {
-        this.messageError.value = "Password without enough length";
-        console.log(this.messageError);
+        console.log("All fields are required dddd");
         return;
       }
-      //Name
-      if (!this.name.value || this.name.length < 1) {
-        this.error = true;
-        this.messageError.value = "Name must contain at least one character";
-        console.log(this.messageError);
+
+      if (this.password !== this.passwordRepeat) {
+        console.log("Passwords do not match");
+        return;
       }
       //Email
       const re =
         /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      if (!this.email.value || this.email.length < 8) {
-        this.messageError = "Email without enough length";
-        console.log(this.messageError);
+      if (this.email.length < 8) {
+        console.log("Email without enough length");
         return;
       }
-      if (!re.test(this.email.value)) {
-        this.messageError.value =
-          "Email incorrect! must contain at least one special character";
-        console.log(this.messageError);
+      if (!re.test(this.email)) {
+        console.log(
+          "Email incorrect! must contain at least one special character"
+        );
         return;
       }
-      //Username
-      if (!this.username.value || this.username.length < 1) {
-        this.error = true;
-        this.messageError.value =
-          "Username must contain at least one character";
-        console.log(this.messageError);
+      //Password
+      if (this.password.length < 8) {
+        console.log("Password must be at least 8 characters long");
+        return;
       }
-      //LastName
-      if (!this.apellidos.value || this.apellidos.length < 1) {
-        this.error = true;
-        this.messageError.value =
-          "Last Name must contain at least one character";
-        console.log(this.messageError);
+      if (!/[A-Z]/.test(this.password)) {
+        console.log("Password must contain at least one uppercase letter");
+        return;
+      }
+      if (!/[a-z]/.test(this.password)) {
+        console.log("Password must contain at least one lowercase letter");
+        return;
+      }
+      if (!/[0-9]/.test(this.password)) {
+        console.log("Password must contain at least one number");
+        return;
+      }
+      if (!/[!@#$%^&*(),.?":{}|<>]/.test(this.password)) {
+        console.log("Password must contain at least one special character");
+        return;
+      }
+      console.log("All fields are correct and validated and me cago puta");
+      try {
+        this.rol = this.selected;
+        const response = await authService.register({
+          username: this.username,
+          name: this.name,
+          surname: this.surname,
+          email: this.email,
+          password: this.password,
+          role: this.rol,
+        });
+        if (this.rol === "1") {
+          this.$router.push("/home-student");
+        } else {
+          this.$router.push("/home-teacher");
+        }
+
+        // const response = await api.post("http://localhost:3000/api/register", {
+        // const response = await api.post("/register", {
+        //   username: this.username.valueOf,
+        //   name: this.name.value,
+        //   surname: this.surname.value,
+        //   email: this.email.valueOf,
+        //   password: this.password,
+        //   role: this.role.value,
+        // });
+        this.message = response.data.message;
+      } catch (error) {
+        console.log("ServerErrorDeCojones:", error);
+        this.message = error.response
+          ? error.response.data.message
+          : "Server error2";
       }
     },
   },

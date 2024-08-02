@@ -40,7 +40,6 @@
           <form class="mt-8 space-y-6" action="#">
             <div>
               <label
-                for="email"
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >Your email</label
               >
@@ -55,7 +54,6 @@
             </div>
             <div>
               <label
-                for="password"
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >Your password</label
               >
@@ -80,9 +78,7 @@
                 />
               </div>
               <div class="ms-3 text-sm">
-                <label
-                  for="remember"
-                  class="font-medium text-gray-500 dark:text-gray-400"
+                <label class="font-medium text-gray-500 dark:text-gray-400"
                   >Remember this device</label
                 >
               </div>

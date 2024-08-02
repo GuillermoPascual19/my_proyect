@@ -3,7 +3,7 @@
     <h1 class="title">¿Forgot your password?</h1>
     <form action class="form" @submit.prevent="login">
       <p class="msg">Write your email and we will contact you.</p>
-      <label class="form-label" for="#email">Email</label>
+      <label class="form-label">Email</label>
       <input
         v-model="username"
         class="form-input"

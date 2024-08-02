@@ -3,7 +3,7 @@
     <h1 class="title">Sign In</h1>
     <form action class="form" @submit.prevent="register">
       <p class="error">HOLAAAA HOME</p>
-      <label class="form-label" for="#email">Email:</label>
+      <label class="form-label">Email:</label>
       <input
         v-model="email"
         class="form-input"
@@ -12,7 +12,7 @@
         required
         placeholder="Email"
       />
-      <label class="form-label" for="#password">Password:</label>
+      <label class="form-label">Password:</label>
       <input
         v-model="password"
         class="form-input"
@@ -20,9 +20,7 @@
         id="password"
         placeholder="Password"
       />
-      <label class="form-label" for="#password-repeat"
-        >Repite la contraeña:</label
-      >
+      <label class="form-label">Repite la contraeña:</label>
       <input
         v-model="passwordRepeat"
         class="form-input"

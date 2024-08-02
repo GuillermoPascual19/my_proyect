@@ -3,7 +3,7 @@ import { User } from '../models/user';
 import Utils from '../config/utils'; // Adjust the import based on your project structure
 import db from '../config/database'; // Adjust the import based on your project structure
 import nodemailer from 'nodemailer';
-
+import bcrypt from 'bcrypt';
 
 const transporter = nodemailer.createTransport({
   service: 'Gmail',
@@ -56,33 +56,33 @@ export const recoverPassword = async (req: Request, res: Response) => {
   });
 };
 
-/*
-export const checkValidEmail = (req: Request, res: Response, next: NextFunction) => {
-	if (Utils.keysChecker(req.body, ["email"])) {
-		const email = req.body.email;
-		db.users.findOne({ where: { email: email } }).then((user: any) => {
-			if (!user) return next();
-			else {
-				return res
-					.status(400)
-					.send(
-						Utils.buildErrorResponse(
-							"EMAIL_ALREADY_EXISTS",
-							"Email already exists",
-							"Email already exists in database"
-						)
-					);
-			}
-		});
-	} else
-		return res
-			.status(400)
-			.send(
-				Utils.buildErrorResponse(
-					"EMAIL_NOT_FOUND",
-					"Email not found",
-					"Email not found in body please provide email in body"
-				)
-			);
+export const registerUser = async (req: Request, res: Response) => {
+  const { username, email, password, role, name, surname } = req.body;
+  try {
+    // Verificar si el usuario ya existe
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Encriptar la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Crear un nuevo usuario
+    const newUser = await User.create({
+      username,
+      name,
+      surname,
+      email,
+      password: hashedPassword,
+      role,
+    });
+
+    console.log('New user created:', newUser); // Log para verificar la inserción
+
+    res.status(201).json({ message: 'User registered successfully', user: newUser });
+  } catch (error) {
+    console.error('Error creating user:', error); // Log para capturar el error
+    res.status(500).json({ message: 'Server error', error });
+  }
 };
-*/

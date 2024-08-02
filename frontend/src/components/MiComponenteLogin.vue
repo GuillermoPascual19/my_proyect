@@ -1,8 +1,8 @@
 <template>
   <div class="register">
     <h1 class="title">Sign In</h1>
-    <form action class="form" @submit="submitForm">
-      <label class="form-label" for="#email">Email:</label>
+    <form action class="form" @submit="registerUser">
+      <label class="form-label">Email:</label>
       <input
         v-model="email"
         class="form-input"
@@ -11,7 +11,7 @@
         required
         placeholder="Email"
       />
-      <label class="form-label" for="#password">Password:</label>
+      <label class="form-label">Password:</label>
       <input
         v-model="password"
         class="form-input"
@@ -50,6 +50,19 @@ export default {
     ],
   }),
   methods: {
+    async register() {
+      try {
+        await auth.register(this.email, this.password);
+        if (this.role.value == "1") {
+          this.$router.push("/student");
+        } else {
+          this.$router.push("/teacher");
+        }
+      } catch (error) {
+        this.error = true;
+        console.log(error);
+      }
+    },
     async login() {
       try {
         await auth.login(this.email, this.password);
@@ -78,7 +91,6 @@ export default {
       } else {
         return 0;
       }
-      //Comprobar si esta en la base de datos
     },
     validEmail(email) {
       const re =
@@ -86,7 +98,6 @@ export default {
       return re.test(email);
     },
     submitForm() {
-      this.email.preventDefault();
       if (this.validEmail(this.email) && this.validateNewData() != 1) {
         this.emailError = false;
         // Aquí puedes manejar el envío del formulario

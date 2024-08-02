@@ -1,17 +1,33 @@
-import { DataTypes } from 'sequelize';
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { DataTypes, Optional } from 'sequelize';
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
 import sequelize from '../config/database';
 
+// Definir los atributos que tendrá el modelo User
+interface UserAttributes {
+  id: number;
+  name: string;
+  surname: string;
+  username: string;
+  email: string;
+  password: string;
+  role: string; // Agregamos el atributo role si es necesario
+}
+
+// Define una interfaz para la creación de usuarios
+interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+
 @Table({
-  timestamps: true,
-  tableName: 'users',
+  timestamps: false, // Desactivar timestamps a nivel de tabla
+  tableName: 'Users',
 })
-export class User extends Model<User> {
+export class User extends Model<User, UserCreationAttributes> {
+  @PrimaryKey
+  @AutoIncrement
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
-  id!: string;
+  id!: number;
 
   @Column({
     type: DataType.STRING,
@@ -38,7 +54,7 @@ export class User extends Model<User> {
   email!: string;
 
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.STRING,
     allowNull: false,
   })
   password!: string;
@@ -49,69 +65,5 @@ export class User extends Model<User> {
   })
   role!: string;
 }
-
-User.init({
-  id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    primaryKey: true,
-  },
-  username: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  $add: '',
-  $set: '',
-  $get: '',
-  $count: '',
-  $create: '',
-  $has: '',
-  $remove: '',
-  reload: '',
-  _attributes: '',
-  dataValues: '',
-  _creationAttributes: '',
-  isNewRecord: '',
-  sequelize: '',
-  where: '',
-  getDataValue: '',
-  setDataValue: '',
-  get: '',
-  set: '',
-  setAttributes: '',
-  changed: '',
-  previous: '',
-  save: '',
-  validate: '',
-  update: '',
-  destroy: '',
-  restore: '',
-  increment: '',
-  decrement: '',
-  equals: '',
-  equalsOneOf: '',
-  toJSON: '',
-  isSoftDeleted: '',
-  _model: '',
-  addHook: '',
-  removeHook: '',
-  hasHook: '',
-  hasHooks: '',
-  name: '',
-  surname: '',
-  role: ''
-}, {
-  sequelize,
-  modelName: 'User'
-});
 
 export default User;
