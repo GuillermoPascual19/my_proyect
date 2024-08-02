@@ -147,7 +147,7 @@ export default {
         !this.password ||
         !this.selected
       ) {
-        console.log("All fields are required dddd");
+        console.log("All fields are required");
         return;
       }
 
@@ -172,24 +172,20 @@ export default {
       if (this.password.length < 8) {
         console.log("Password must be at least 8 characters long");
         return;
-      }
-      if (!/[A-Z]/.test(this.password)) {
+      } else if (!/[A-Z]/.test(this.password)) {
         console.log("Password must contain at least one uppercase letter");
         return;
-      }
-      if (!/[a-z]/.test(this.password)) {
+      } else if (!/[a-z]/.test(this.password)) {
         console.log("Password must contain at least one lowercase letter");
         return;
-      }
-      if (!/[0-9]/.test(this.password)) {
+      } else if (!/[0-9]/.test(this.password)) {
         console.log("Password must contain at least one number");
         return;
-      }
-      if (!/[!@#$%^&*(),.?":{}|<>]/.test(this.password)) {
+      } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(this.password)) {
         console.log("Password must contain at least one special character");
         return;
       }
-      console.log("All fields are correct and validated and me cago puta");
+      console.log("All fields are correct and validated correctly");
       try {
         this.rol = this.selected;
         const response = await authService.register({
@@ -205,22 +201,12 @@ export default {
         } else {
           this.$router.push("/home-teacher");
         }
-
-        // const response = await api.post("http://localhost:3000/api/register", {
-        // const response = await api.post("/register", {
-        //   username: this.username.valueOf,
-        //   name: this.name.value,
-        //   surname: this.surname.value,
-        //   email: this.email.valueOf,
-        //   password: this.password,
-        //   role: this.role.value,
-        // });
         this.message = response.data.message;
       } catch (error) {
-        console.log("ServerErrorDeCojones:", error);
+        console.log("ServerError:", error);
         this.message = error.response
           ? error.response.data.message
-          : "Server error2";
+          : "Server error";
       }
     },
   },

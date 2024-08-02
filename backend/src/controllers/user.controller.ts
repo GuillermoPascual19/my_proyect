@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { User } from '../models/user';
-import Utils from '../config/utils'; // Adjust the import based on your project structure
+import utils from '../utils/utils' // Adjust the import based on your project structure
 import db from '../config/database'; // Adjust the import based on your project structure
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
@@ -17,15 +17,6 @@ export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await User.findAll();
     res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: 'Something went wrong' });
-  }
-};
-
-export const createUser = async (req: Request, res: Response) => {
-  try {
-    const user = await User.create(req.body);
-    res.json(user);
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' });
   }
@@ -58,15 +49,36 @@ export const recoverPassword = async (req: Request, res: Response) => {
 
 export const registerUser = async (req: Request, res: Response) => {
   const { username, email, password, role, name, surname } = req.body;
+  console.log('Registering user:', req.body); // Log para verificar los datos del usuario
+
+  console.log("Registering user:");
+  console.log(username);
+  console.log(name);
+  console.log(surname);
+  console.log(email);
+  console.log(password);
+  console.log(role);
+  // if (!username || !name || !surname || !email || !password || !role) {
+  //   throw new Error("All fields are required cacaulopedopipi");
+  // } 
+  if(!utils.keysChecker(req.body, ['username', 'email', 'password', 'role', 'name', 'surname'])){
+      console.log('All fields are required subnormal'); // Log para verificar el error
+      return res.status(400).json({ message: 'All fields are required subnormal' });
+    }
   try {
     // Verificar si el usuario ya existe
     const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
+    const existingUsername = await User.findOne({ where: { username } });
+    if (existingUser || existingUsername) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
     // Encriptar la contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
+    //const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = utils.cypherText(password).data;
+    const genAccess_token = utils.generateToken(32);
+    const genPassword_token = utils.generateToken(32);
+    const activated = 0;
 
     // Crear un nuevo usuario
     const newUser = await User.create({
@@ -76,13 +88,17 @@ export const registerUser = async (req: Request, res: Response) => {
       email,
       password: hashedPassword,
       role,
+      password_token: genPassword_token,
+      access_token: genAccess_token,
+      active: activated,
     });
 
     console.log('New user created:', newUser); // Log para verificar la inserción
-
     res.status(201).json({ message: 'User registered successfully', user: newUser });
+    //res.json(newUser);
   } catch (error) {
     console.error('Error creating user:', error); // Log para capturar el error
-    res.status(500).json({ message: 'Server error', error });
+    res.status(500).json({ message: 'CAFE Server error', error });
   }
+  
 };

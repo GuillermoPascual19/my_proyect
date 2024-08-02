@@ -10,7 +10,10 @@ interface UserAttributes {
   username: string;
   email: string;
   password: string;
-  role: string; // Agregamos el atributo role si es necesario
+  access_token: string;
+  password_token: string;
+  role: string;
+  active: number;
 }
 
 // Define una interfaz para la creación de usuarios
@@ -63,7 +66,25 @@ export class User extends Model<User, UserCreationAttributes> {
     type: DataType.STRING,
     allowNull: false,
   })
+  access_token!: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  password_token!: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
   role!: string;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  active!: number;
 }
 
 export default User;
