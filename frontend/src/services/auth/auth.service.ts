@@ -14,24 +14,14 @@ class AuthService {
     if (!username || !name || !surname || !email || !password || !role) {
       throw new Error("All fields are required");
     }
-    return api
-      .post("/register", {
-        username,
-        name,
-        surname,
-        email,
-        password,
-        role,
-      })
-      .then((response) => {
-        console.log("Registration successful:", response);
-      })
-      .catch((error) => {
-        console.error(
-          "Error registering user:",
-          error.response?.data || error.message
-        );
-      });
+    return api.post("/register", {
+      username,
+      name,
+      surname,
+      email,
+      password,
+      role,
+    });
   }
 }
 

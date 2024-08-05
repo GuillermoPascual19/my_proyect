@@ -196,14 +196,11 @@ export default {
           password: this.password,
           role: this.rol,
         });
-        if (this.rol === "1") {
-          this.$router.push("/home-student");
-        } else {
-          this.$router.push("/home-teacher");
-        }
-        this.message = response.data.message;
+        this.$router.push("/login");
+        console.log(response);
+        this.message = response.message;
       } catch (error) {
-        console.log("ServerError:", error);
+        console.log("Server Error:", error);
         this.message = error.response
           ? error.response.data.message
           : "Server error";

@@ -1,6 +1,13 @@
-import { DataTypes, Optional } from 'sequelize';
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import sequelize from '../config/database';
+import { DataTypes, Optional } from "sequelize";
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  PrimaryKey,
+  AutoIncrement,
+} from "sequelize-typescript";
+import sequelize from "../config/database";
 
 // Definir los atributos que tendrá el modelo User
 interface UserAttributes {
@@ -17,18 +24,16 @@ interface UserAttributes {
 }
 
 // Define una interfaz para la creación de usuarios
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
 
 @Table({
   timestamps: false, // Desactivar timestamps a nivel de tabla
-  tableName: 'Users',
+  tableName: "Users",
 })
 export class User extends Model<User, UserCreationAttributes> {
   @PrimaryKey
   @AutoIncrement
   @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
   })
   id!: number;
 

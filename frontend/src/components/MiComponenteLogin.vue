@@ -1,7 +1,7 @@
 <template>
   <div class="register">
     <h1 class="title">Sign In</h1>
-    <form action class="form" @submit="registerUser">
+    <form action class="form" @submit="login">
       <label class="form-label">Email:</label>
       <input
         v-model="email"
@@ -50,19 +50,6 @@ export default {
     ],
   }),
   methods: {
-    async register() {
-      try {
-        await auth.register(this.email, this.password);
-        if (this.role.value == "1") {
-          this.$router.push("/student");
-        } else {
-          this.$router.push("/teacher");
-        }
-      } catch (error) {
-        this.error = true;
-        console.log(error);
-      }
-    },
     async login() {
       try {
         await auth.login(this.email, this.password);
@@ -72,11 +59,10 @@ export default {
         auth.setUserLogged(user);
 
         if (this.roles.value == "1") {
-          this.$router.push("/student");
+          this.$router.push("/home-student");
         } else {
-          this.$router.push("/teacher");
+          this.$router.push("/home-teacher");
         }
-        //this.$router.push("/");
       } catch (error) {
         console.log(error);
         this.error = true;
