@@ -51,6 +51,37 @@ export default {
   }),
   methods: {
     async login() {
+      //ValidateEmail
+      const re =
+        /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      if (this.email.length < 8) {
+        console.log("Email without enough length");
+        return;
+      }
+      if (!re.test(this.email)) {
+        console.log(
+          "Email incorrect! must contain at least one special character"
+        );
+        return;
+      }
+      //ValidatePassword
+      if (this.password.length < 8) {
+        console.log("Password must be at least 8 characters long");
+        return;
+      } else if (!/[A-Z]/.test(this.password)) {
+        console.log("Password must contain at least one uppercase letter");
+        return;
+      } else if (!/[a-z]/.test(this.password)) {
+        console.log("Password must contain at least one lowercase letter");
+        return;
+      } else if (!/[0-9]/.test(this.password)) {
+        console.log("Password must contain at least one number");
+        return;
+      } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(this.password)) {
+        console.log("Password must contain at least one special character");
+        return;
+      }
+      //Funcionality
       try {
         await auth.login(this.email, this.password);
         const user = {
@@ -66,30 +97,6 @@ export default {
       } catch (error) {
         console.log(error);
         this.error = true;
-      }
-    },
-    validateNewData() {
-      //Password
-      if (!this.password.value || this.password.length < 8) {
-        this.messageError.value = "Password without enough length";
-        console.log(this.messageError);
-        return 1;
-      } else {
-        return 0;
-      }
-    },
-    validEmail(email) {
-      const re =
-        /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      return re.test(email);
-    },
-    submitForm() {
-      if (this.validEmail(this.email) && this.validateNewData() != 1) {
-        this.emailError = false;
-        // Aquí puedes manejar el envío del formulario
-        this.login();
-      } else {
-        this.emailError = true;
       }
     },
   },

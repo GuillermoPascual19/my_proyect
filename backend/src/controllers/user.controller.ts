@@ -22,6 +22,31 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
+export const sendEmailRegister = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).send("Email is required");
+  }
+
+  // Genera un token de recuperación (aquí puedes agregar lógica para almacenar el token en la base de datos)
+  const token = Math.random().toString(36).substr(2);
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Nuevo registro",
+    text: `Bienvenido a nuestra página web. Para recuperar tu contraseña, haz clic en el siguiente enlace: https://tusitio.com/reset-password?token=${token}`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return res.status(500).send(error.toString());
+    }
+    res.status(200).send("Correo de recuperación enviado");
+  });
+};
+
 export const recoverPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
 
@@ -92,6 +117,8 @@ export const registerUser = async (req: Request, res: Response) => {
         active: 0,
       });
 
+      sendEmailRegister(req, res);
+      
       console.log("New user created:", newUser); // Log para verificar la inserción
       res
         .status(201)

@@ -155,7 +155,7 @@ export default {
         console.log("Passwords do not match");
         return;
       }
-      //Email
+      //ValidateEmail
       const re =
         /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       if (this.email.length < 8) {
@@ -168,7 +168,7 @@ export default {
         );
         return;
       }
-      //Password
+      //ValidatePassword
       if (this.password.length < 8) {
         console.log("Password must be at least 8 characters long");
         return;
