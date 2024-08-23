@@ -1,9 +1,9 @@
 <template>
   <div class="fondo">
-    <h1 class="title">Activa tu cuenta!</h1>
+    <h1 class="title">¡Activa tu cuenta!</h1>
     <div class="form-group">
-      <label class="form-label" for="access_token"
-        >Introduce tu access Token:
+      <label class="form-label" for="access_token">
+        Introduce tu access Token:
       </label>
       <input
         class="form-input"
@@ -21,6 +21,15 @@ import { ref } from "vue";
 import userService from "../services/user/user.service";
 
 export default {
+  data: () => ({
+    icons: [
+      "fab fa-facebook",
+      "fab fa-twitter",
+      "fab fa-google-plus",
+      "fab fa-linkedin",
+      "fab fa-instagram",
+    ],
+  }),
   setup() {
     const user = ref([]);
     const access_token = ref("");
@@ -30,11 +39,7 @@ export default {
           access_token: this.access_token,
         });
         user.value = response.data;
-        if (user.value.role === "1") {
-          this.$router.push("/student");
-        } else if (user.value.role === "2") {
-          this.$router.push("/teacher");
-        }
+        this.$router.push("/login");
       } catch (error) {
         console.error("Error al obtener las asignaturas:", error);
       }
@@ -50,16 +55,16 @@ export default {
 </script>
 
 <style scoped>
-.title {
-  text-align: center;
-  font-family: "Helvetica", sans-serif;
-  font-size: 60px;
-  font-weight: 800;
-  color: #45a049;
-  margin-bottom: 5rem;
-  position: relative;
+html,
+body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
 }
+
 .fondo {
+  flex: 1;
   margin: 3rem auto;
   display: flex;
   flex-direction: column;
@@ -73,14 +78,32 @@ export default {
   padding: 40px;
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
 }
+
+.footer-container {
+  display: flex;
+  width: 100%;
+  margin-top: auto;
+}
+
+.title {
+  text-align: center;
+  font-family: "Helvetica", sans-serif;
+  font-size: 60px;
+  font-weight: 800;
+  color: #45a049;
+  margin-bottom: 5rem;
+}
+
 body {
   background-color: #f0f0f0;
   color: #333;
   font-family: Arial, sans-serif;
 }
+
 h1 {
   color: #555;
 }
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -96,18 +119,18 @@ h1 {
   margin-bottom: 0.5rem;
 }
 
-.form-input,
-.form-select {
+.form-input {
   padding: 10px 15px;
   margin-bottom: 3rem;
   margin-left: 8rem;
   margin-right: 8rem;
   background: none;
-  border: none; /* Cambia esto para el borde blanco */
+  border: none;
   color: white;
-  border-radius: 5px; /* Opcional: añadir bordes redondeados */
+  border-radius: 5px;
   box-shadow: 0 4px 10px 4px rgba(19, 35, 47, 0.9);
 }
+
 .btn-add {
   padding: 5px 10px;
   margin-left: 11rem;

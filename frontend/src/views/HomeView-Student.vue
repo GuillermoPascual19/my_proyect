@@ -1,6 +1,5 @@
 <template>
   <div class="app">
-    <SidebarComponent />
     <div class="content-container">
       <div class="fondo">
         <h1 class="title">Student</h1>
@@ -34,12 +33,8 @@
 
 <script>
 import { ref } from "vue";
-import SidebarComponent from "../components/SidebarComponent.vue";
 
 export default {
-  components: {
-    SidebarComponent,
-  },
   setup() {
     const subjects = ref([
       { id: 1, name: "Matemáticas" },
@@ -69,8 +64,11 @@ export default {
 </script>
 <style scoped>
 .app {
-  display: flex;
-  min-height: 100vh;
+  align-items: center;
+  display: flex-center;
+  justify-content: center;
+  min-width: auto;
+  width: 800px;
   background-color: #f8f9fa;
 }
 
@@ -81,12 +79,19 @@ export default {
 }
 
 .fondo {
-  margin: 0 auto;
+  flex: 1;
+  margin: 3rem auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 20%;
+  min-width: 800px;
+  min-height: 500px;
+  max-width: 100%;
   background: rgba(19, 35, 47, 0.9);
   border-radius: 5px;
   padding: 40px;
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
-  max-width: 800px;
 }
 
 .title {
