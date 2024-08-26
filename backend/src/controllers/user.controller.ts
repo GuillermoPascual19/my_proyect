@@ -35,8 +35,10 @@ export const getUsersByRole = async (req: Request, res: Response) => {
 };
 
 const sendWelcomeEmail = async (user: User): Promise<void> => {
-  if(!user.email) {
-    console.error("El usuario no tiene un correo electrónico al que mandar el mensaje de bienvenida");
+  if (!user.email) {
+    console.error(
+      "El usuario no tiene un correo electrónico al que mandar el mensaje de bienvenida"
+    );
     return;
   }
   // Configura el transporte de Nodemailer
@@ -154,6 +156,43 @@ export const registerUser = async (req: Request, res: Response) => {
       res.status(550).json({ message: "CAFE Server error", error });
     }
   }
+};
+
+export const loginUser = async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).send("Username and password are required");
+  }
+
+  await User.findOne({ where: { username } })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+
+      bcrypt
+        .compare(password, user.password)
+        .then((validPassword) => {
+          if (!validPassword) {
+            return res.status(401).send("Invalid password");
+          }
+
+          console.log("User logged in successfully"); // Log para verificar
+          return res.status(200).json({ 
+            id: user.id,
+            name: user.name
+ });
+        })
+        .catch((error) => {
+          console.error("Error comparing passwords:", error); // Log para capturar el error
+          return res.status(550).json({ message: "CAFE Server error", error });
+        });
+    })
+    .catch((error) => {
+      console.error("Error logging in:", error); // Log para capturar el error
+      return res.status(550).json({ message: "CAFE Server error", error });
+    });
 };
 
 export const activateAccount = async (req: Request, res: Response) => {

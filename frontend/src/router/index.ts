@@ -5,6 +5,7 @@ import ComponenteRegistro from "@/components/ComponenteRegistro.vue";
 import MiComponenteLogin from "@/components/MiComponenteLogin.vue";
 import ComponenteOlvidoC from "@/components/ComponenteOlvidoC.vue";
 import ComponenteActivarCuenta from "@/components/ComponenteActivarCuenta.vue";
+//import ComponenteChat from "@/components/ComponenteChat.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -42,12 +43,14 @@ const routes: Array<RouteRecordRaw> = [
     name: "ComponenteActivarCuenta",
     component: ComponenteActivarCuenta,
   },
+  // {
+  //   path: "/teamschat",
+  //   name: "ComponenteChat",
+  //   component: ComponenteChat,
+  // },
   {
     path: "/about",
     name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   },

@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <h1 class="title">¿Forgot your password?</h1>
-    <form action class="form" @submit.prevent="login">
+    <form action class="form" @submit.prevent="recoverPassword">
       <p class="msg">Write your email and we will contact you.</p>
       <label class="form-label">Email</label>
       <input

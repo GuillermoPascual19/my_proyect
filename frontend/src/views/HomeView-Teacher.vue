@@ -1,25 +1,27 @@
 <!-- src/components/Subjects.vue -->
 <template>
-  <div class="fondo">
-    <h1 class="title">Teacher</h1>
-    <table class="subjects-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre del Alumno</th>
-          <th>Apellidos del Alumno</th>
-          <th>Email del Alumno</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="student in students" :key="student.id">
-          <td>{{ student.id }}</td>
-          <td>{{ student.name }}</td>
-          <td>{{ student.surname }}</td>
-          <td>{{ student.email }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="app">
+    <div class="fondo">
+      <h1 class="title">Teacher</h1>
+      <table class="subjects-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre del Alumno</th>
+            <th>Apellidos del Alumno</th>
+            <th>Email del Alumno</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="student in students" :key="student.id">
+            <td>{{ student.id }}</td>
+            <td>{{ student.name }}</td>
+            <td>{{ student.surname }}</td>
+            <td>{{ student.email }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -57,25 +59,31 @@ export default {
 </script>
 
 <style scoped>
+.app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90vh; /* Full viewport height */
+  background-color: #f8f9fa;
+  margin: 0;
+}
 .title {
   text-align: center;
   font-family: "Helvetica", sans-serif;
   font-size: 60px;
   font-weight: 800;
   color: #45a049;
+  margin-bottom: 20px;
 }
 .fondo {
-  margin: 3rem auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 20%;
-  min-width: 800px;
-  min-height: 500px;
-  max-width: 100%;
+  align-items: center; /* Center content horizontally */
+  width: 800px;
   background: rgba(19, 35, 47, 0.9);
   border-radius: 5px;
-  padding: 40px;
+  padding: 30px;
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
 }
 body {

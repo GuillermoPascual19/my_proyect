@@ -1,95 +1,90 @@
 <template>
   <div class="register">
     <h1 class="title">Sign In</h1>
-    <form action class="form" @submit="login">
-      <label class="form-label">Email:</label>
-      <input
-        v-model="email"
-        class="form-input"
-        type="email"
-        id="email"
-        required
-        placeholder="Email"
-      />
-      <label class="form-label">Password:</label>
-      <input
-        v-model="password"
-        class="form-input"
-        type="password"
-        id="password"
-        required
-        placeholder="Password"
-      />
-      <input class="form-submit" type="submit" value="Sign In" />
-    </form>
-    <p class="msg">
-      ¿No account?
-      <router-link to="/registro">Sign up</router-link>
-    </p>
-    <router-link
-      to="/olvidoContraseña"
-      class="ms-auto text-sm font-medium text-blue-600 hover:underline dark:text-blue-500"
-      >Lost Password?</router-link
-    >
+    <div>
+      <form action class="form" @submit="login">
+        <label class="form-label">Username:</label>
+        <input
+          v-model="username"
+          class="form-input"
+          type="text"
+          id="username"
+          required
+          placeholder="Username"
+        />
+        <label class="form-label">Password:</label>
+        <input
+          v-model="password"
+          class="form-input"
+          type="password"
+          id="password"
+          required
+          placeholder="Password"
+        />
+        <input class="form-submit" type="submit" value="Sign In" />
+      </form>
+    </div>
+    <div class="mensajes">
+      <p class="msg">
+        ¿No account?
+        <router-link to="/registro">Sign up</router-link>
+      </p>
+      <router-link
+        to="/olvidoContraseña"
+        class="ms-auto text-sm font-medium text-blue-600 hover:underline dark:text-blue-500"
+        >Lost Password?</router-link
+      >
+    </div>
   </div>
 </template>
 
 <script>
-import auth from "@/logic/auth";
-import { ref } from "vue";
+import auth from "@/services/auth/auth.service";
 
 export default {
   data: () => ({
-    email: "",
+    username: "",
     password: "",
     error: false,
-    selected: ref(""),
-    roles: [
-      { value: "1", name: "Student" },
-      { value: "2", name: "Teacher" },
-    ],
   }),
   methods: {
     async login() {
-      //ValidateEmail
-      const re =
-        /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      if (this.email.length < 8) {
-        console.log("Email without enough length");
-        return;
-      }
-      if (!re.test(this.email)) {
-        console.log(
-          "Email incorrect! must contain at least one special character"
-        );
+      if (!this.username || !this.password) {
+        console.log("Username and password are required");
+        console.error("Username and password are required");
         return;
       }
       //ValidatePassword
       if (this.password.length < 8) {
         console.log("Password must be at least 8 characters long");
+        console.error("Password must be at least 8 characters long");
         return;
       } else if (!/[A-Z]/.test(this.password)) {
         console.log("Password must contain at least one uppercase letter");
+        console.error("Password must contain at least one uppercase letter");
         return;
       } else if (!/[a-z]/.test(this.password)) {
         console.log("Password must contain at least one lowercase letter");
+        console.error("Password must contain at least one lowercase letter");
         return;
       } else if (!/[0-9]/.test(this.password)) {
         console.log("Password must contain at least one number");
+        console.error("Password must contain at least one number");
         return;
       } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(this.password)) {
         console.log("Password must contain at least one special character");
+        console.error("Password must contain at least one special character");
         return;
       }
       //Funcionality
       try {
-        await auth.login(this.email, this.password);
-        const user = {
-          email: this.email,
-        };
-        auth.setUserLogged(user);
+        const user = await auth.login({
+          username: this.username,
+          password: this.password,
+        });
+        //auth.setUserLogged(user);
 
-        if (this.roles.value == "1") {
+        if (user.role.value == "1") {
           this.$router.push("/home-student");
         } else {
           this.$router.push("/home-teacher");
@@ -112,6 +107,7 @@ export default {
   font-family: "Helvetica", sans-serif;
   font-size: 50px;
   font-weight: 800;
+  margin-top: 4%;
 }
 .form {
   margin: 3rem auto;
@@ -178,13 +174,17 @@ export default {
   margin: 1rem 0 0;
   color: #ff4a96;
 }
-.msg {
-  margin-top: 3rem;
-  text-align: center;
-}
 .remember {
   margin-top: 3rem;
   text-align: center;
   border-radius: 5px;
+}
+.mensajes {
+  flex-direction: column;
+  align-items: center; /* Center the content horizontally */
+  justify-content: center; /* Center the content vertically */
+  text-align: center;
+  margin-top: 2rem; /* Adjust this value as needed for spacing */
+  padding: 1rem;
 }
 </style>

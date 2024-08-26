@@ -6,11 +6,15 @@ import { createVuetify } from "vuetify";
 import "vuetify/styles"; // Ensure you import Vuetify styles
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
+import "@mdi/font/css/materialdesignicons.css"; // Ensure you are using css-loader
 
 // Create a Vuetify instance
 const vuetify = createVuetify({
   components,
   directives,
+  icons: {
+    defaultSet: "mdi", // This is already the default value - only for display purposes
+  },
 });
 
 createApp(App).use(router).use(vuetify).mount("#app");

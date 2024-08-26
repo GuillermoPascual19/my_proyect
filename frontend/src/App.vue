@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <SidebarComponent />
+    <SidebarComponent class="sidebar" />
     <div class="content">
       <nav>
         <router-link to="/login">Home</router-link> |
@@ -46,6 +46,7 @@ body,
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+  min-width: 100%;
 }
 
 .content {
@@ -54,12 +55,13 @@ body,
   flex-direction: column;
   justify-content: space-between;
   min-height: 0;
-  margin-left: 250px; /* Ajusta este valor según el ancho del Sidebar */
+  margin-left: 50px; /* Ajusta este valor según el ancho del Sidebar */
 }
 
 nav {
   padding: 15px;
-  background-color: #f5f5f5;
+  background-color: #7bd8bf;
+  text-align: center;
 }
 
 nav a {
@@ -69,7 +71,7 @@ nav a {
 }
 
 nav a.router-link-exact-active {
-  color: #42b983;
+  color: #e70e0e;
 }
 
 .main-content {
@@ -80,5 +82,9 @@ nav a.router-link-exact-active {
 
 .material-symbols-outlined {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.sidebar {
+  max-width: 11%;
 }
 </style>

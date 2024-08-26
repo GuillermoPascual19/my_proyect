@@ -7,7 +7,7 @@
           <v-list-item-content>
             <v-icon large>mdi-vuetify</v-icon>
           </v-list-item-content>
-          <v-list-item-action>
+          <v-list-item-action click>
             <v-icon>mdi-menu-open</v-icon>
           </v-list-item-action>
         </v-list-item>
@@ -15,7 +15,12 @@
         <!-- Main Links -->
         <v-divider></v-divider>
         <v-list-item-group active-class="active-item">
-          <v-list-item v-for="item in menuItems" :key="item.title" link>
+          <v-list-item
+            v-for="item in menuItems"
+            :key="item.title"
+            link
+            @click="redirectTo"
+          >
             <v-list-item-action>
               <v-icon>{{ item.icon }}</v-icon>
             </v-list-item-action>
@@ -33,10 +38,9 @@
 export default {
   data: () => ({
     menuItems: [
-      { title: "Home", icon: "mdi-home" },
-      { title: "About", icon: "mdi-eye" },
-      { title: "Team", icon: "mdi-account-group" },
-      { title: "Contact", icon: "mdi-email" },
+      { title: "Home", icon: "mdi-home", route: "/" },
+      { title: "About Us", icon: "mdi-eye", route: "/about" },
+      { title: "TeamsChat", icon: "mdi-account-group", route: "/teamschat" },
     ],
   }),
 };
@@ -58,10 +62,14 @@ export default {
 
 .active-item {
   background-color: #42b983 !important; /* Fondo verde para el elemento activo */
+  justify-content: center;
+  text-align: center;
 }
 
 .v-list-item-group .v-list-item {
-  margin: 5px 0; /* Espaciado entre los elementos del menú */
+  cursor: pointer; /* Cambia el cursor al pasar por encima de los elementos */
+  justify-content: center;
+  text-align: center;
 }
 
 .v-divider {
