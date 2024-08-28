@@ -1,84 +1,204 @@
 <template>
-  <v-app>
-    <v-navigation-drawer app permanent color="#35495e" dark width="260">
-      <v-list>
-        <!-- Logo and Collapse Button -->
-        <v-list-item>
-          <v-list-item-content>
-            <v-icon large>mdi-vuetify</v-icon>
-          </v-list-item-content>
-          <v-list-item-action click>
-            <v-icon>mdi-menu-open</v-icon>
-          </v-list-item-action>
-        </v-list-item>
+  <aside :class="`${is_expanded ? 'is-expanded' : ''}`">
+    <div class="logo">
+      <v-icon large>mdi-vuetify</v-icon>
+    </div>
 
-        <!-- Main Links -->
-        <v-divider></v-divider>
-        <v-list-item-group active-class="active-item">
-          <v-list-item
-            v-for="item in menuItems"
-            :key="item.title"
-            link
-            @click="redirectTo"
-          >
-            <v-list-item-action>
-              <v-icon>{{ item.icon }}</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list-item-group>
-      </v-list>
-    </v-navigation-drawer>
-  </v-app>
+    <div class="menu-toggle-wrap">
+      <button class="menu-toggle" @click="ToggleMenu">
+        <v-icon>mdi-menu-open</v-icon>
+      </button>
+    </div>
+
+    <h3>Menu</h3>
+    <div class="menu">
+      <router-link to="/" class="button">
+        <v-icon large>mdi-home</v-icon>
+        <span class="text">Home</span>
+      </router-link>
+      <router-link to="/about" class="button">
+        <v-icon>mdi-eye</v-icon>
+        <span class="text">About</span>
+      </router-link>
+      <router-link to="/team" class="button">
+        <v-icon>mdi-account-group</v-icon>
+        <span class="text">TeamsChat</span>
+      </router-link>
+      <router-link to="/contact" class="button">
+        <v-icon>mdi-image</v-icon>
+        <span class="text">Images</span>
+      </router-link>
+    </div>
+
+    <div class="flex"></div>
+
+    <div class="menu">
+      <router-link to="/settings" class="button">
+        <v-icon>mdi-wrench</v-icon>
+        <span class="text">Settings</span>
+      </router-link>
+    </div>
+  </aside>
 </template>
 
-<script>
-export default {
-  data: () => ({
-    menuItems: [
-      { title: "Home", icon: "mdi-home", route: "/" },
-      { title: "About Us", icon: "mdi-eye", route: "/about" },
-      { title: "TeamsChat", icon: "mdi-account-group", route: "/teamschat" },
-    ],
-  }),
+<script setup>
+import { ref } from "vue";
+
+const is_expanded = ref(localStorage.getItem("is_expanded") === "true");
+
+const ToggleMenu = () => {
+  is_expanded.value = !is_expanded.value;
+  localStorage.setItem("is_expanded", is_expanded.value);
 };
 </script>
 
-<style scoped>
-.v-navigation-drawer {
-  background-color: #35495e; /* Fondo oscuro para la barra lateral */
-}
+<style lang="scss" scoped>
+aside {
+  display: flex;
+  flex-direction: column;
 
-.v-list-item-content,
-.v-list-item-action {
-  color: white; /* Color blanco para el texto e íconos */
-}
+  background-color: var(--dark);
+  color: var(--light);
 
-.v-list-item:hover {
-  background-color: #42b983; /* Fondo verde cuando se pasa el cursor */
-}
+  width: calc(2rem + 32px);
+  overflow: hidden;
+  min-height: 100vh;
+  padding: 1rem;
 
-.active-item {
-  background-color: #42b983 !important; /* Fondo verde para el elemento activo */
-  justify-content: center;
-  text-align: center;
-}
+  transition: 0.2s ease-in-out;
 
-.v-list-item-group .v-list-item {
-  cursor: pointer; /* Cambia el cursor al pasar por encima de los elementos */
-  justify-content: center;
-  text-align: center;
-}
+  .flex {
+    flex: 1 1 0%;
+  }
 
-.v-divider {
-  margin: 10px 0;
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.1
-  ); /* Divider con algo de transparencia */
+  .logo {
+    margin-bottom: 1rem;
+
+    img {
+      width: 2rem;
+    }
+  }
+
+  .menu-toggle-wrap {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+
+    position: relative;
+    top: 0;
+    transition: 0.2s ease-in-out;
+
+    .menu-toggle {
+      transition: 0.2s ease-in-out;
+      .material-icons {
+        font-size: 2rem;
+        color: var(--light);
+        transition: 0.2s ease-out;
+      }
+
+      &:hover {
+        .material-icons {
+          color: var(--primary);
+          transform: translateX(0.5rem);
+        }
+      }
+    }
+  }
+
+  h3,
+  .button .text {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  h3 {
+    color: var(--grey);
+    font-size: 0.975rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .menu {
+    margin: 0 -1rem;
+
+    .button {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+
+      transition: 0.2s ease-in-out;
+      padding: 0.5rem 1rem;
+
+      .material-icons {
+        font-size: 2rem;
+        color: var(--light);
+        transition: 0.2s ease-in-out;
+      }
+      .text {
+        color: var(--light);
+        transition: 0.2s ease-in-out;
+      }
+
+      &:hover {
+        background-color: var(--dark-alt);
+
+        .material-icons,
+        .text {
+          color: var(--primary);
+        }
+      }
+
+      &.router-link-exact-active {
+        background-color: var(--dark-alt);
+        border-right: 5px solid var(--primary);
+
+        .material-icons,
+        .text {
+          color: var(--primary);
+        }
+      }
+    }
+  }
+
+  .footer {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+
+    p {
+      font-size: 0.875rem;
+      color: var(--grey);
+    }
+  }
+
+  &.is-expanded {
+    width: var(--sidebar-width);
+
+    .menu-toggle-wrap {
+      top: -3rem;
+
+      .menu-toggle {
+        transform: rotate(-180deg);
+      }
+    }
+
+    h3,
+    .button .text {
+      opacity: 1;
+    }
+
+    .button {
+      .material-icons {
+        margin-right: 1rem;
+      }
+    }
+
+    .footer {
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    position: absolute;
+    z-index: 99;
+  }
 }
 </style>

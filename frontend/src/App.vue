@@ -6,12 +6,11 @@
         <router-link to="/login">Home</router-link> |
         <router-link to="/teacher">Home-Teacher</router-link> |
         <router-link to="/student">Home-Student</router-link> |
-        <router-link to="/olvidoContraseña">olvidoContraseña</router-link> |
-        <router-link to="/cambiarContraseña">cambiarC</router-link> |
-        <router-link to="/registro">registro</router-link> |
         <router-link to="/about">About</router-link>
       </nav>
-      <router-view />
+      <div class="main-content">
+        <router-view />
+      </div>
       <FooterComponent />
     </div>
   </div>
@@ -44,11 +43,11 @@ body,
 
 #app {
   display: flex;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
   min-width: 100%;
+}
+
+.sidebar {
+  width: 11%;
 }
 
 .content {
@@ -56,8 +55,6 @@ body,
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 0;
-  margin-left: 50px; /* Ajusta este valor según el ancho del Sidebar */
 }
 
 nav {
@@ -78,15 +75,11 @@ nav a.router-link-exact-active {
 
 .main-content {
   flex: 1;
-  padding: 20px;
+  padding: 10px;
   overflow-y: auto;
 }
 
 .material-symbols-outlined {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
-}
-
-.sidebar {
-  max-width: 11%;
 }
 </style>
