@@ -59,7 +59,7 @@ const sendWelcomeEmail = async (user: User): Promise<void> => {
       <h1>Hola ${user.name},</h1>
       <p>Gracias por registrarte en nuestra aplicación. Estamos emocionados de tenerte con nosotros.</p>
       <p>Si tienes alguna pregunta, no dudes en ponerte en contacto con nuestro equipo de soporte.</p>
-      <p>Su token de acceso ${user.access_token}</p>
+      <p>Su token de acceso '${user.access_token}'</p>
       <p>¡Bienvenido a bordo!</p>
       <a href="http://localhost:8080/activarCuenta">Activa tu cuenta</a>
       <p>Saludos,<br>El equipo de nuestra aplicación</p>
@@ -75,30 +75,7 @@ const sendWelcomeEmail = async (user: User): Promise<void> => {
   }
 };
 
-export const recoverPassword = async (req: Request, res: Response) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).send("Email is required");
-  }
-
-  // Genera un token de recuperación (aquí puedes agregar lógica para almacenar el token en la base de datos)
-  const token = Math.random().toString(36).substr(2);
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: "Recuperación de contraseña",
-    text: `Para recuperar tu contraseña, haz clic en el siguiente enlace: https://tusitio.com/reset-password?token=${token}`,
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return res.status(501).send(error.toString());
-    }
-    res.status(200).send("Correo de recuperación enviado");
-  });
-};
+//Registro de usuario----------------------------------------------
 
 export const registerUser = async (req: Request, res: Response) => {
   if (!req.body)
@@ -158,6 +135,8 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
+//Login de usuario----------------------------------------------
+
 export const loginUser = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
@@ -179,10 +158,10 @@ export const loginUser = async (req: Request, res: Response) => {
           }
 
           console.log("User logged in successfully"); // Log para verificar
-          return res.status(200).json({ 
-            id: user.id,
-            name: user.name
- });
+          return res
+            .status(200)
+
+            .send({ message: "User logged in successfully", user });
         })
         .catch((error) => {
           console.error("Error comparing passwords:", error); // Log para capturar el error
@@ -190,10 +169,12 @@ export const loginUser = async (req: Request, res: Response) => {
         });
     })
     .catch((error) => {
-      console.error("Error logging in:", error); // Log para capturar el error
+      console.error("Error logging in, can´t find this user:", error); // Log para capturar el error
       return res.status(550).json({ message: "CAFE Server error", error });
     });
 };
+
+//Activar cuenta de usuario----------------------------------------------
 
 export const activateAccount = async (req: Request, res: Response) => {
   const { access_token } = req.body;
@@ -215,4 +196,107 @@ export const activateAccount = async (req: Request, res: Response) => {
 
   console.log("Account activated successfully"); // Log para verificar
   res.status(200).json(user);
+};
+
+//Recuperar contraseña----------------------------------------------
+export const recoverPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).send("Email is required");
+  }
+
+  try {
+    await User.findOne({ where: { email } })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      console.log("User found successfully"); 
+
+      if(user.active === 0){
+        return res.status(403).send("User not activated");
+      }
+      // Genera un token de recuperación (aquí puedes agregar lógica para almacenar el token en la base de datos)
+      const token = utils.generateToken(32);
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Recuperación de contraseña",
+        //Cambiar la URL por la de tu aplicación
+        text: `Para recuperar tu contraseña, haz clic en el siguiente enlace: "http://localhost:8080/cambiarContraseña", ingrese el siguiente token en la web, de manera que podamos identificarle: "${token}"`,
+      };
+      try {
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            return res.status(501).send(error.toString());
+          }
+          res.status(200).send("Correo de recuperación enviado");
+        });
+      } catch (error) {
+        console.error("Error sending recovery email:", error);
+        return res.status(550).json({ message: "CAFE Server error", error });
+      }
+      
+    })
+    .catch((error) => {
+      console.error("Error comparing passwords:", error); // Log para capturar el error
+      return res.status(550).json({ message: "CAFE Server error", error });
+    });
+  } catch (error) {
+    console.error("Error recovering password:", error); // Log para capturar el error
+    return res.status(550).json({ message: "CAFE Server error", error });
+  }  
+};
+
+//Cambiar contraseña----------------------------------------------
+export const changePassword = async (req: Request, res: Response) => {
+  const { access_token, password } = req.body;
+
+  if (!access_token || !password) {
+    return res.status(400).send("Access token and password are required");
+  }
+
+  try {
+    const user = await User.findOne({ where: { access_token } });
+    if (!user) {
+      console.log("User not found. Access token isnt found"); // Log para verificar el error
+      return res.status(403).send("User not found. Access token isnt found");
+    }
+    // guardar ese acces-token en la base de datos
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const token = utils.generateToken(32);
+    user.access_token = token;
+    user.password = hashedPassword;
+    await user.save();
+  
+    console.log("Password changed and new access_token generated successfully"); // Log para verificar
+    res.status(200).json(user);
+  
+    //Enviar email con nuevo acces-token  
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Cambio de contraseña",
+      //Cambiar la URL por la de tu aplicación
+      text: `Ha cambiado de contraseña, sr/a ${user.name}.
+        Para recuperar su contraseña en un futuro, le hemos concedido un nuevo token de acceso de manera que podamos identificarle. 
+        Se lo adjuntamos a continuación: "${token}"`,
+    };
+    try {
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          return res.status(500).send(error.toString());
+        }
+        res.status(200).send("Correo de recuperación enviado");
+      });
+    } catch (error) {
+      console.error("Error sending recovery email:", error);
+      return res.status(550).json({ message: "CAFE Server error", error });
+    }
+  } catch (error) {
+    console.error("Error changing password:", error); // Log para capturar el error
+    return res.status(550).json({ message: "CAFE Server error", error });
+  }  
 };

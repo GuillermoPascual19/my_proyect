@@ -4,9 +4,11 @@
     <div class="content">
       <nav>
         <router-link to="/login">Home</router-link> |
-        <router-link to="/home-teacher">Home-Teacher</router-link> |
-        <router-link to="/home-student">Home-Student</router-link> |
-        <router-link to="/activarCuenta">Activar cuenta</router-link> |
+        <router-link to="/teacher">Home-Teacher</router-link> |
+        <router-link to="/student">Home-Student</router-link> |
+        <router-link to="/olvidoContraseña">olvidoContraseña</router-link> |
+        <router-link to="/cambiarContraseña">cambiarC</router-link> |
+        <router-link to="/registro">registro</router-link> |
         <router-link to="/about">About</router-link>
       </nav>
       <router-view />

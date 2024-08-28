@@ -5,6 +5,7 @@ import ComponenteRegistro from "@/components/ComponenteRegistro.vue";
 import MiComponenteLogin from "@/components/MiComponenteLogin.vue";
 import ComponenteOlvidoC from "@/components/ComponenteOlvidoC.vue";
 import ComponenteActivarCuenta from "@/components/ComponenteActivarCuenta.vue";
+import ComponenteCambiarC from "@/components/ComponenteCambiarC.vue";
 //import ComponenteChat from "@/components/ComponenteChat.vue";
 
 const routes: Array<RouteRecordRaw> = [
@@ -14,13 +15,13 @@ const routes: Array<RouteRecordRaw> = [
     component: MiComponenteLogin,
   },
   {
-    path: "/home-student",
-    name: "home-student",
+    path: "/student",
+    name: "student",
     component: HomeViewStudent,
   },
   {
-    path: "/home-teacher",
-    name: "home-teacher",
+    path: "/teacher",
+    name: "teacher",
     component: HomeViewTeacher,
   },
   {
@@ -42,6 +43,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/activarCuenta",
     name: "ComponenteActivarCuenta",
     component: ComponenteActivarCuenta,
+  },
+  {
+    path: "/cambiarContraseña",
+    name: "ComponenteCambiarC",
+    component: ComponenteCambiarC,
   },
   // {
   //   path: "/teamschat",

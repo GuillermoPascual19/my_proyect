@@ -19,39 +19,30 @@
 </template>
 
 <script>
-import { ref } from "vue";
 import userService from "../services/user/user.service";
 
 export default {
   data: () => ({
-    icons: [
-      "fab fa-facebook",
-      "fab fa-twitter",
-      "fab fa-google-plus",
-      "fab fa-linkedin",
-      "fab fa-instagram",
-    ],
+    access_token: "",
   }),
-  setup() {
-    const user = ref([]);
-    const access_token = ref("");
-    const activateAccount = async () => {
+  methods: {
+    async activateAccount() {
+      if (!this.access_token) {
+        console.log("access_token is required");
+        console.error("access_token is required");
+      }
       try {
         const response = await userService.activateAccount({
           access_token: this.access_token,
         });
-        user.value = response.data;
+        const user = response.data;
+        console.log("Usuario activado: ", user);
         this.$router.push("/login");
       } catch (error) {
-        console.error("Error al obtener las asignaturas:", error);
+        console.log("Error al activar la cuenta :");
+        console.error("Error al activar la cuenta :");
       }
-    };
-
-    return {
-      access_token,
-      activateAccount,
-      user,
-    };
+    },
   },
 };
 </script>

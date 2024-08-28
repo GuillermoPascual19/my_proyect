@@ -1,16 +1,24 @@
 import api from "..";
 
 class AuthService {
-  async login(userData: { username: string; password: string }) {
+  login(userData: { username: string; password: string }) {
     const { username, password } = userData;
     // Validate data
     if (!username || !password) {
       throw new Error("All fields are required");
     }
-    await api.post("/signin", { username, password }).then((response) => {
-      console.log("RESPONSE:", response);
-      return response;
-    });
+    return api
+      .post("/signin", { username, password })
+      .then((response) => {
+        if (response.status !== 200) {
+          throw new Error("Login failed");
+        }
+        return response.data; // Extracting the actual data
+      })
+      .catch((error) => {
+        console.error("Login failed:", error);
+        throw error;
+      });
   }
 
   register(userData: {

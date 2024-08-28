@@ -5,7 +5,7 @@
       <p class="msg">Write your email and we will contact you.</p>
       <label class="form-label">Email</label>
       <input
-        v-model="username"
+        v-model="email"
         class="form-input"
         type="email"
         id="username"
@@ -13,47 +13,53 @@
         placeholder="Email"
       />
 
-      <p v-if="error" class="error">Has introducido mal el usuario</p>
       <input class="form-submit" type="submit" value="Enviar correo" />
     </form>
   </div>
 </template>
 
 <script>
+import UserService from "@/services/user/user.service.ts";
+
 export default {
   data() {
     return {
       email: "",
-      error: false,
-      errorMessage: "",
-      success: false,
-      successMessage: "",
     };
   },
   methods: {
     //Enviamos una solicitud POST a la ruta /recover-password del backend con el correo electrónico del usuario.
     //Manejamos el estado de éxito y error para proporcionar retroalimentación al usuario.
     async recoverPassword() {
+      //ValidateEmail
+      const re =
+        /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      if (this.email.length < 8) {
+        console.log("Email without enough length");
+        return;
+      }
+      if (!re.test(this.email)) {
+        console.log(
+          "Email incorrect! must contain at least one special character"
+        );
+        return;
+      }
       try {
-        const response = await fetch("http://localhost:3000/recover-password", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: this.email }),
+        const response = await UserService.recoverPassword({
+          email: this.email,
         });
-
-        if (!response.ok) {
-          throw new Error("No se pudo enviar el correo de recuperación");
+        if (response.status === 200) {
+          alert("Correo enviado");
+          this.$router.push("/changePassword");
         }
-
-        this.success = true;
-        this.successMessage = "Correo de recuperación enviado correctamente";
-        this.error = false;
       } catch (error) {
-        this.error = true;
-        this.errorMessage = error.message;
-        this.success = false;
+        console.log(
+          "Error: No se ha podido enviar el correo de recuperación de contraseña"
+        );
+        console.error(
+          "Error: No se ha podido enviar el correo de recuperación de contraseña"
+        );
+        return;
       }
     },
   },

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAllUsers, recoverPassword, registerUser, getUsersByRole, activateAccount, loginUser } from '../controllers/user.controller';
+import { getAllUsers, recoverPassword, registerUser, getUsersByRole, activateAccount, loginUser, changePassword } from '../controllers/user.controller';
 
 const router = Router();
 
@@ -10,5 +10,9 @@ router.post('/recover-password', recoverPassword);
 router.post('/register', registerUser);
 router.post('/activate-account', activateAccount);
 router.post('/signin', loginUser);
+router.post('/change-password', changePassword);
 
 export default router;
+
+
+//Apagar las pantallas perros

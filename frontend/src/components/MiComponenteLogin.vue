@@ -2,7 +2,7 @@
   <div class="register">
     <h1 class="title">Sign In</h1>
     <div>
-      <form action class="form" @submit="login">
+      <form action class="form" @submit.prevent="login">
         <label class="form-label">Username:</label>
         <input
           v-model="username"
@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import auth from "@/services/auth/auth.service";
+import AuthService from "@/services/auth/auth.service.ts";
 
 export default {
   data: () => ({
@@ -78,16 +78,18 @@ export default {
       }
       //Funcionality
       try {
-        const user = await auth.login({
+        const response = await AuthService.login({
           username: this.username,
           password: this.password,
         });
         //auth.setUserLogged(user);
-
-        if (user.role.value == "1") {
-          this.$router.push("/home-student");
-        } else {
-          this.$router.push("/home-teacher");
+        const user = response.user;
+        console.log(user.role.value);
+        console.log("--------------------");
+        if (user.role == "1") {
+          this.$router.push("/student");
+        } else if (user.role == "2") {
+          this.$router.push("/teacher");
         }
       } catch (error) {
         console.log(error);
