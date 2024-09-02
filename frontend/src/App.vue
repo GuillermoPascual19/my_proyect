@@ -3,36 +3,30 @@
     <SidebarComponent class="sidebar" />
     <div class="content">
       <nav>
-        <router-link to="/login">Home</router-link> |
+        <router-link to="/login">Login</router-link> |
         <router-link to="/teacher">Home-Teacher</router-link> |
         <router-link to="/student">Home-Student</router-link> |
-        <router-link to="/about">About</router-link>
+        <router-link to="/changeCredentials">changeCredentials</router-link> |
+        <router-link to="/profileSt">ProfileStud</router-link> |
+        <router-link to="/profileTe">ProfileTeach</router-link>
       </nav>
       <div class="main-content">
         <router-view />
       </div>
-      <FooterComponent />
     </div>
   </div>
 </template>
-
 <script>
-//import { ref } from "vue";
-import SidebarComponent from "./components/complementsApp/SidebarComponent.vue";
-import FooterComponent from "./components/complementsApp/FooterComponent.vue";
+import SidebarComponent from "./components/complementsApp/SideBar.vue";
 
 export default {
+  name: "App",
   components: {
     SidebarComponent,
-    FooterComponent,
   },
 };
 </script>
-<style>
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+<style lang="scss" scoped>
 html,
 body,
 #app {
@@ -82,4 +76,55 @@ nav a.router-link-exact-active {
 .material-symbols-outlined {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
+// aside {
+//   display: flex;
+//   flex-direction: column;
+
+//   background-color: var(--dark);
+//   color: var(--light);
+
+//   width: calc(2rem + 32px);
+//   overflow: hidden;
+//   min-height: 100vh;
+//   padding: 1rem;
+
+//   transition: 0.2s ease-in-out;
+
+//   .flex {
+//     flex: 1 1 0%;
+//   }
+
+//   .logo {
+//     margin-bottom: 1rem;
+
+//     img {
+//       width: 2rem;
+//     }
+//   }
+//   .menu-toggle-wrap {
+//     display: flex;
+//     justify-content: flex-end;
+//     margin-bottom: 1rem;
+
+//     position: relative;
+//     top: 0;
+//     transition: 0.2s ease-in-out;
+
+//     .menu-toggle {
+//       transition: 0.2s ease-in-out;
+//       .material-icons {
+//         font-size: 2rem;
+//         color: var(--light);
+//         transition: 0.2s ease-out;
+//       }
+
+//       &:hover {
+//         .material-icons {
+//           color: var(--primary);
+//           transform: translateX(0.5rem);
+//         }
+//       }
+//     }
+//   }
+// }
 </style>

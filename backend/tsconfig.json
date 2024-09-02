@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ES2022",
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
@@ -9,8 +9,16 @@
     "emitDecoratorMetadata": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["webpack-env"]
+    "types": ["webpack-env"],
+    "typeRoots": ["./typings/", "./node_modules/@types"],
+    "isolatedModules": true
   },
-  "include": ["src/**/*", "sequelize.config.js", "src/**/*.ts", "global.d.ts"],
+  "include": [
+    "src/**/*",
+    "sequelize.config.js",
+    "src/**/*.ts",
+    "global.d.ts",
+    "typings/**/*.d.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

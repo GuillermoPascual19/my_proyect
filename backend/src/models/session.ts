@@ -23,7 +23,7 @@ export class Students_teachers extends Model<Students_teachers, UserCreationAttr
     type: DataType.INTEGER,
     allowNull: false,
   })
-  id!: number;
+  declare id: number;
 
   @Column({
     type: DataType.INTEGER,

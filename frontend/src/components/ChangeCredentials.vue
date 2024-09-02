@@ -1,19 +1,25 @@
 <template>
-  <div class="register">
-    <h1 class="title">Register</h1>
-    <form class="form" @submit.prevent="registerUser">
+  <div class="app">
+    <div class="user-info">
+      <span class="user-name">{{ userName }}</span>
+      <v-avatar class="avatar" size="80" color="grey">
+        <v-img :src="profilePictureUrl"></v-img>
+      </v-avatar>
+    </div>
+    <div class="botones">
+      <router-link to="/login" class="button">
+        <v-btn
+          class="ma-2"
+          color="purple"
+          icon="mdi-exit-to-app"
+          @click="cerrarSesion"
+        ></v-btn>
+        <span class="text">Close Session</span>
+      </router-link>
+    </div>
+    <h1 class="title" msg=""></h1>
+    <form class="form" @submit.prevent="changeInfo">
       <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Username</label>
-          <input
-            v-model="username"
-            class="form-input"
-            type="text"
-            id="username"
-            required
-            placeholder="PepitoGrillo19"
-          />
-        </div>
         <div class="form-group">
           <label class="form-label">Name</label>
           <input
@@ -48,31 +54,7 @@
           />
         </div>
         <div class="form-group">
-          <label class="form-label">Password</label>
-          <input
-            v-model="password"
-            class="form-input"
-            type="password"
-            id="password"
-            required
-            placeholder="Password"
-            rules="required|min:6"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Repite la contraseña:</label>
-          <input
-            v-model="passwordRepeat"
-            class="form-input"
-            type="password"
-            id="password-repeat"
-            required
-            placeholder="Password"
-            rules="required|confirmed:password"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label-role">Role</label>
+          <label class="form-label">Role</label>
           <flowbite-themable :theme="theme">
             <fwb-select
               text="Role"
@@ -85,37 +67,40 @@
           </flowbite-themable>
         </div>
         <div class="form-group full-width">
-          <p v-if="error" class="error">
-            Has introducido mal el usuario o la contraseña
-          </p>
-        </div>
-        <p v-if="error" class="error">
-          Has introducido mal el usuario o la contraseña
-        </p>
-        <div class="form-group full-width">
-          <input class="form-submit" type="submit" value="Register" />
+          <v-btn class="ma-2" color="green">
+            Accept
+            <v-icon icon="mdi-checkbox-marked-circle" end></v-icon>
+          </v-btn>
+          <v-btn class="ma-2" color="red">
+            Decline
+            <v-icon icon="mdi-cancel" end></v-icon>
+          </v-btn>
         </div>
       </div>
     </form>
+    <div class="fileSelector">
+      <input
+        type="file"
+        class="input-subject"
+        @change="onFileSelected"
+        accept="image/*"
+      />
+    </div>
   </div>
 </template>
 
 <script>
 import { FwbSelect } from "flowbite-vue";
-//import { ref } from "vue";
+import userService from "../services/user/user.service";
 import authService from "../services/auth/auth.service";
 
 export default {
   name: "ComponenteRegistro",
   //Data
   data: () => ({
-    username: "",
     name: "",
     email: "",
     surname: "",
-    password: "",
-    passwordRepeat: "",
-    error: false,
     accessToken: "3rhb23uydb238ry6g2429hrh",
     selected: "",
     rolesOpt: [
@@ -124,6 +109,10 @@ export default {
     ],
     rol: "",
     theme: "dark",
+    subjects: [],
+    selectedFile: null,
+    profilePictureUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
+    userName: "",
   }),
   //Components
   components: {
@@ -131,28 +120,13 @@ export default {
   },
   //Methods
   methods: {
-    async registerUser() {
-      console.log(this.username);
+    async changeInfo() {
       console.log(this.name);
       console.log(this.surname);
       console.log(this.email);
-      console.log(this.password);
-      console.log(this.passwordRepeat);
       console.log(this.selected);
-      if (
-        !this.username ||
-        !this.name ||
-        !this.surname ||
-        !this.email ||
-        !this.password ||
-        !this.selected
-      ) {
+      if (!this.name || !this.surname || !this.email || !this.selected) {
         console.log("All fields are required");
-        return;
-      }
-
-      if (this.password !== this.passwordRepeat) {
-        console.log("Passwords do not match");
         return;
       }
       //ValidateEmail
@@ -168,35 +142,20 @@ export default {
         );
         return;
       }
-      //ValidatePassword
-      if (this.password.length < 8) {
-        console.log("Password must be at least 8 characters long");
-        return;
-      } else if (!/[A-Z]/.test(this.password)) {
-        console.log("Password must contain at least one uppercase letter");
-        return;
-      } else if (!/[a-z]/.test(this.password)) {
-        console.log("Password must contain at least one lowercase letter");
-        return;
-      } else if (!/[0-9]/.test(this.password)) {
-        console.log("Password must contain at least one number");
-        return;
-      } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(this.password)) {
-        console.log("Password must contain at least one special character");
-        return;
-      }
       console.log("All fields are correct and validated correctly");
       try {
         this.rol = this.selected;
-        const response = await authService.register({
-          username: this.username,
+        const response = await userService.changeCredentials({
           name: this.name,
           surname: this.surname,
           email: this.email,
-          password: this.password,
           role: this.rol,
         });
-        this.$router.push("/login");
+        if (this.rol === "1") {
+          this.$router.push("/student");
+        } else {
+          this.$router.push("/teacher");
+        }
         console.log(response);
         this.message = response.message;
       } catch (error) {
@@ -206,6 +165,31 @@ export default {
           : "Server error";
       }
     },
+    getUserName() {
+      try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user && user.name && user.surname) {
+          this.userName = user.name + " " + user.surname;
+        } else {
+          this.userName = "Usuario";
+        }
+      } catch (error) {
+        console.error("Error al obtener el nombre del usuario:", error);
+        this.userName = "Usuario"; // Nombre predeterminado en caso de error
+      }
+    },
+    async cerrarSesion() {
+      try {
+        await authService.logout();
+        localStorage.removeItem("user");
+        this.$router.push("/login");
+      } catch (error) {
+        console.error("Error al cerrar sesión:", error);
+      }
+    },
+  },
+  mounted() {
+    this.getUserName();
   },
   props: {
     msg: String,
@@ -213,15 +197,15 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.register {
-  padding: 2rem;
-}
-
-.title {
-  text-align: center;
-  font-family: "Helvetica", sans-serif;
-  font-size: 50px;
-  font-weight: 800;
+.app {
+  display: flex;
+  flex-direction: column; /* Asegura que los elementos se organicen en columna */
+  align-items: center;
+  justify-content: flex-start; /* Mantiene los elementos alineados al inicio de la columna */
+  min-height: 90vh;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding-top: 100px;
 }
 
 .form {
@@ -236,6 +220,60 @@ export default {
   border-radius: 5px;
   padding: 40px;
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
+}
+
+.fileSelector {
+  margin-top: 20px; /* Asegura que haya espacio entre el formulario y este contenedor */
+  width: 40%;
+  min-width: 700px;
+  max-width: 100%;
+  background: #ffffff; /* Opcional: un fondo diferente */
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  text-align: center;
+  font-family: "Helvetica", sans-serif;
+  font-size: 50px;
+  font-weight: 800;
+}
+.user-info {
+  position: absolute;
+  top: 70px; /* Ajusta según el tamaño del navbar */
+  right: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.user-name {
+  margin-right: 10px; /* Espacio entre el nombre y el avatar */
+  font-size: 18px;
+  font-weight: bold;
+  color: #333; /* Color del texto del nombre del usuario */
+}
+
+.avatar {
+  margin-left: 10px;
+}
+.botones {
+  position: absolute;
+  top: 160px; /* Coloca los botones debajo del avatar */
+  right: 40px;
+  display: flex;
+  flex-direction: column; /* Organiza los botones en columna */
+  justify-content: flex-start; /* Alinea los botones al inicio de la columna */
+  align-items: center;
+  margin-top: 20px;
+}
+
+.button {
+  display: flex;
+  flex-direction: column; /* Alinea el icono y el texto en columna */
+  align-items: center;
+  margin-bottom: 10px; /* Espacio entre los botones */
+  text-decoration: none; /* Elimina el subrayado de los enlaces */
 }
 
 .form-grid {
@@ -287,14 +325,5 @@ export default {
 
 .form-submit:hover {
   background: #0b9185;
-}
-
-.error {
-  color: #ff4a96;
-}
-
-.remember {
-  text-align: center;
-  border-radius: 5px;
 }
 </style>

@@ -1,18 +1,13 @@
 <template>
   <div class="app">
+    <!-- Mueve el avatar y el nombre fuera del contenedor "fondo" -->
     <div class="user-info">
-      <span class="user-name">{{ userName }}</span>
       <v-avatar class="avatar" size="80" color="grey" @click="gotoProfile">
         <v-img :src="profilePictureUrl"></v-img>
       </v-avatar>
+      <span class="user-name">{{ userName }}</span>
     </div>
 
-    <!-- File Upload -->
-    <!-- <vue-file-agent
-      v-model="selectedFile"
-      @select="onFileSelected"
-      multiple
-    ></vue-file-agent> -->
     <div class="botones">
       <router-link to="/settings" class="button">
         <v-btn
@@ -34,27 +29,35 @@
       </router-link>
     </div>
 
+    <!-- Contenedor "fondo" -->
     <div class="fondo">
-      <h1 class="title">Teacher</h1>
-      <table class="subjects-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre del Alumno</th>
-            <th>Apellidos del Alumno</th>
-            <th>Email del Alumno</th>
-            <th>Asignatura</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="student in students" :key="student.id">
-            <td>{{ student.id }}</td>
-            <td>{{ student.name }}</td>
-            <td>{{ student.surname }}</td>
-            <td>{{ student.email }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <label id="username" class="form-input" msg=""></label>
+          <span class="username">{{ username }}</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <label id="name" class="form-input" msg=""></label>
+          <span class="name">{{ name }}</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <label id="surname" class="form-input" msg=""></label>
+          <span class="surname">{{ surname }}</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <label id="dirCorreo" class="form-input" msg=""></label>
+          <span class="dirCorreo">{{ dirCorreo }}</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <label id="role" class="form-input" msg=""></label>
+          <span class="role">{{ role }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -80,7 +83,11 @@ export default {
       try {
         const user = JSON.parse(localStorage.getItem("user"));
         if (user && user.name && user.surname) {
-          this.userName = user.name + " " + user.surname;
+          this.userName = user.userName + " ";
+          this.name = user.name + "";
+          this.surname = user.surname + "";
+          this.email = user.email + "";
+          this.role = user.rol + "";
         } else {
           this.userName = "Usuario";
         }
@@ -92,7 +99,6 @@ export default {
     async fetchAsignaturas() {
       try {
         const response = await userService.getStudents();
-        console.log("Students:", response.data);
         this.students.value = response.data;
       } catch (error) {
         console.error("Error al obtener las asignaturas:", error);
@@ -140,92 +146,72 @@ export default {
 <style scoped>
 .app {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 90vh; /* Full viewport height */
+  min-height: 90vh;
   background-color: #f8f9fa;
-  margin: 0;
-  padding-top: 100px; /* Añade espacio para el navbar */
+  padding-top: 100px;
+  position: relative;
 }
-.title {
-  text-align: center;
-  font-family: "Helvetica", sans-serif;
-  font-size: 60px;
-  font-weight: 800;
-  color: #4dc753;
-  margin-bottom: 20px;
-}
-.subtitle {
-  color: #45a049;
-}
+
 .user-info {
-  position: absolute;
-  top: 70px; /* Ajusta según el tamaño del navbar */
-  right: 40px;
   display: flex;
   align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 20px;
 }
 
 .user-name {
-  margin-right: 10px; /* Espacio entre el nombre y el avatar */
+  margin-left: 10px;
   font-size: 18px;
   font-weight: bold;
-  color: #333; /* Color del texto del nombre del usuario */
+  color: #333;
 }
 
 .avatar {
-  margin-left: 10px;
+  cursor: pointer;
 }
+
 .botones {
   position: absolute;
-  top: 160px; /* Coloca los botones debajo del avatar */
-  right: 40px;
+  top: 20px;
+  right: 20px;
   display: flex;
-  flex-direction: column; /* Organiza los botones en columna */
-  justify-content: flex-start; /* Alinea los botones al inicio de la columna */
-  align-items: center;
-  margin-top: 20px;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .button {
   display: flex;
-  flex-direction: column; /* Alinea el icono y el texto en columna */
   align-items: center;
-  margin-bottom: 10px; /* Espacio entre los botones */
-  text-decoration: none; /* Elimina el subrayado de los enlaces */
+  margin-bottom: 10px;
+  text-decoration: none;
 }
+
+.text {
+  margin-left: 5px;
+  font-size: 14px;
+  color: black;
+}
+
 .fondo {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center; /* Center content horizontally */
-  width: 800px;
+  align-items: center;
   background: rgba(19, 35, 47, 0.9);
   border-radius: 5px;
   padding: 30px;
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
-}
-body {
-  background-color: #f0f0f0;
-  color: #333;
-  font-family: Arial, sans-serif;
-}
-
-h1 {
-  color: #555;
-}
-
-.text {
-  margin-top: 5px; /* Espacio entre el icono y el texto */
-  font-size: 14px;
-  color: black;
+  width: 800px;
+  margin-top: 100px; /* Añade un margen superior para que el avatar quede encima */
 }
 
 .subjects-table {
   width: 100%;
   margin-top: 20px;
   border-collapse: collapse;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .subjects-table th,
@@ -245,31 +231,5 @@ h1 {
 
 .subjects-table tbody tr:nth-child(even) {
   background-color: #f0f0f0;
-}
-
-.form-container {
-  margin-top: 20px;
-}
-
-.input-subject {
-  padding: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.btn-add {
-  padding: 5px 10px;
-  margin-left: 10px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.btn-add:hover {
-  background-color: #45a049;
 }
 </style>

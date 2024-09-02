@@ -1,18 +1,21 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import HomeViewStudent from "../views/HomeView-Student.vue";
 import HomeViewTeacher from "../views/HomeView-Teacher.vue";
-import ComponenteRegistro from "@/components/ComponenteRegistro.vue";
-import MiComponenteLogin from "@/components/MiComponenteLogin.vue";
-import ComponenteOlvidoC from "@/components/ComponenteOlvidoC.vue";
-import ComponenteActivarCuenta from "@/components/ComponenteActivarCuenta.vue";
-import ComponenteCambiarC from "@/components/ComponenteCambiarC.vue";
+import CompRegistro from "@/components/CompRegistro.vue";
+import MiLogin from "@/components/MiLogin.vue";
+import OlvidoC from "@/components/OlvidoC.vue";
+import ActivarCuenta from "@/components/ActivarCuenta.vue";
+import CambiarC from "@/components/CambiarC.vue";
+import changeCredentials from "@/components/ChangeCredentials.vue";
+import profileStudent from "@/components/ProfileView-Student.vue";
+import profileTeacher from "@/components/ProfileView-Teacher.vue";
 //import ComponenteChat from "@/components/ComponenteChat.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "home",
-    component: MiComponenteLogin,
+    component: MiLogin,
   },
   {
     path: "/student",
@@ -26,28 +29,43 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/login",
-    name: "MiComponenteLogin",
-    component: MiComponenteLogin,
+    name: "MiLogin",
+    component: MiLogin,
   },
   {
     path: "/registro",
-    name: "ComponenteRegistro",
-    component: ComponenteRegistro,
+    name: "CompRegistro",
+    component: CompRegistro,
   },
   {
-    path: "/olvidoContraseña",
-    name: "ComponenteOlvidoC",
-    component: ComponenteOlvidoC,
+    path: "/forgot",
+    name: "OlvidoC",
+    component: OlvidoC,
   },
   {
-    path: "/activarCuenta",
-    name: "ComponenteActivarCuenta",
-    component: ComponenteActivarCuenta,
+    path: "/activateAccount",
+    name: "ActivarCuenta",
+    component: ActivarCuenta,
   },
   {
-    path: "/cambiarContraseña",
-    name: "ComponenteCambiarC",
-    component: ComponenteCambiarC,
+    path: "/Change",
+    name: "CambiarC",
+    component: CambiarC,
+  },
+  {
+    path: "/changeCredentials",
+    name: "changeCredentials",
+    component: changeCredentials,
+  },
+  {
+    path: "/profileSt",
+    name: "profileStudent",
+    component: profileStudent,
+  },
+  {
+    path: "/profileTe",
+    name: "profileTeacher",
+    component: profileTeacher,
   },
   // {
   //   path: "/teamschat",

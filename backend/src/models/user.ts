@@ -8,8 +8,14 @@ import {
   AutoIncrement,
   AllowNull,
   Default,
+  ForeignKey,
+  BelongsTo,
+  HasMany,
 } from "sequelize-typescript";
 import sequelize from "../config/database";
+import Students_teachers from "./students-teachers";
+import Session from "./session";
+import Roles from "./roles";
 
 // Definir los atributos que tendrá el modelo User
 interface UserAttributes {
@@ -22,7 +28,8 @@ interface UserAttributes {
   access_token: string;
   password_token: string;
   role: string;
-  active: number;
+  active: boolean;
+  image: string;
 }
 
 // Define una interfaz para la creación de usuarios
@@ -33,11 +40,15 @@ interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
   tableName: "Users",
 })
 export class User extends Model<User, UserCreationAttributes> {
+  [x: string]: any;
+  // [x: string]: any;
   @PrimaryKey
   @AutoIncrement
-  @Column({
-  })
-  id!: number;
+  @HasMany(() => Students_teachers, 'id_student')
+  @HasMany(() => Students_teachers, 'id_teacher')
+  @HasMany(() => Session, 'id_user')
+  @Column({})
+  declare id: number;
 
   @Column({
     type: DataType.STRING,
@@ -81,6 +92,8 @@ export class User extends Model<User, UserCreationAttributes> {
   })
   password_token!: string;
 
+  @ForeignKey(() => Roles)
+  @BelongsTo(() => Roles)
   @Column({
     type: DataType.STRING,
     allowNull: false,
@@ -88,10 +101,16 @@ export class User extends Model<User, UserCreationAttributes> {
   role!: string;
 
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.BOOLEAN,
     allowNull: false,
   })
-  active!: number;
+  active!: boolean;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  image!: string;
 }
 
 export default User;

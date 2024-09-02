@@ -30,7 +30,7 @@
         <router-link to="/registro">Sign up</router-link>
       </p>
       <router-link
-        to="/olvidoContraseña"
+        to="/forgot"
         class="ms-auto text-sm font-medium text-blue-600 hover:underline dark:text-blue-500"
         >Lost Password?</router-link
       >
@@ -86,10 +86,11 @@ export default {
         const user = response.user;
         console.log(user.role.value);
         console.log("--------------------");
+        localStorage.setItem("user", JSON.stringify(user));
         if (user.role == "1") {
-          this.$router.push("/student");
+          this.$router.push("/student?token=" + user.access_token);
         } else if (user.role == "2") {
-          this.$router.push("/teacher");
+          this.$router.push("/teacher?token=" + user.access_token);
         }
       } catch (error) {
         console.log(error);

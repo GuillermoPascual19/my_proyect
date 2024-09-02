@@ -66,6 +66,10 @@ class AuthService {
       role,
     });
   }
+
+  cerrarSesion() {
+    return api.get("/signout");
+  }
 }
 
 export default new AuthService();

@@ -7,6 +7,7 @@ import "vuetify/styles"; // Ensure you import Vuetify styles
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import "@mdi/font/css/materialdesignicons.css"; // Ensure you are using css-loader
+import "./assets/tailwind.css"; // Import Tailwind CSS
 
 // Create a Vuetify instance
 const vuetify = createVuetify({

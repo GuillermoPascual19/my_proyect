@@ -1,62 +1,114 @@
 <template>
   <div class="app">
+    <div class="user-info">
+      <span class="user-name">{{ userName }}</span>
+      <v-avatar class="avatar" size="80" color="grey">
+        <v-img :src="profilePictureUrl"></v-img>
+      </v-avatar>
+    </div>
+    <!-- File Upload -->
+    <!-- <vue-file-agent
+      v-model="selectedFile"
+      @select="onFileSelected"
+      multiple
+    ></vue-file-agent> -->
+    <div class="botones">
+      <router-link to="/settings" class="button">
+        <v-btn
+          class="ma-2"
+          color="purple"
+          icon="mdi-wrench"
+          @click="changeCredentials"
+        ></v-btn>
+        <span class="text">Settings</span>
+      </router-link>
+      <router-link to="/login" class="button">
+        <v-btn
+          class="ma-2"
+          color="purple"
+          icon="mdi-exit-to-app"
+          @click="cerrarSesion"
+        ></v-btn>
+        <span class="text">Close Session</span>
+      </router-link>
+    </div>
+
     <div class="fondo">
       <h1 class="title">Student</h1>
       <h3 class="subtitle">Asignaturas</h3>
       <table class="subjects-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>Nombre</th>
+            <th>Apellidos</th>
+            <th>Email</th>
             <th>Nombre de la Asignatura</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="subject in subjects" :key="subject.id">
-            <td>{{ subject.id }}</td>
-            <td>{{ subject.name }}</td>
+            <td>{{ subject.name_teacher }}</td>
+            <td>{{ subject.surname_teacher }}</td>
+            <td>{{ subject.email_teacher }}</td>
+            <td>{{ subject.name_subject }}</td>
           </tr>
         </tbody>
       </table>
-      <div class="form-container">
-        <input
-          v-model="newSubject"
-          placeholder="Nueva Asignatura"
-          class="input-subject"
-        />
-        <button @click="addSubject" class="btn-add">Añadir Asignatura</button>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
+import userService from "../services/user/user.service";
+import authService from "../services/auth/auth.service";
 
 export default {
-  setup() {
-    const subjects = ref([
-      { id: 1, name: "Matemáticas" },
-      { id: 2, name: "Ciencias" },
-      { id: 3, name: "Historia" },
-    ]);
-
-    const newSubject = ref("");
-
-    const addSubject = () => {
-      if (newSubject.value.trim() !== "") {
-        subjects.value.push({
-          id: subjects.value.length + 1,
-          name: newSubject.value.trim(),
-        });
-        newSubject.value = "";
+  data: () => ({
+    subjects: [],
+    user_id: "",
+    selectedFile: null,
+    profilePictureUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
+    userName: "",
+  }),
+  methods: {
+    getUserName() {
+      try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user && user.name && user.surname) {
+          this.userName = user.name + " " + user.surname;
+          this.user_id = user.id;
+        } else {
+          this.userName = "Usuario";
+        }
+      } catch (error) {
+        console.error("Error al obtener el nombre del usuario:", error);
+        this.userName = "Usuario"; // Nombre predeterminado en caso de error
       }
-    };
-
-    return {
-      subjects,
-      newSubject,
-      addSubject,
-    };
+    },
+    async cerrarSesion() {
+      try {
+        await authService.logout();
+        localStorage.removeItem("user");
+        this.$router.push("/login");
+      } catch (error) {
+        console.error("Error al cerrar sesión:", error);
+      }
+    },
+    async fetchSubjects() {
+      try {
+        const response = await userService.getSubjectsByStudent(this.user_id);
+        this.subjects.email_teacher = response.data.subject_email;
+        this.subjects.name_subject = response.data.subject_name;
+        this.subjects.name_teacher = response.data.name_teacher;
+        this.subjects.surname_teacher = response.data.surname_teacher;
+      } catch (error) {
+        console.error("Error fetching subjects:", error);
+      }
+    },
+  },
+  mounted() {
+    this.getUserName();
+    this.fetchSubjects();
   },
 };
 </script>
@@ -68,6 +120,51 @@ export default {
   min-height: 90vh; /* Full viewport height */
   background-color: #f8f9fa;
   margin: 0;
+  padding-top: 100px; /* Añade espacio para el navbar */
+}
+.title {
+  text-align: center;
+  font-family: "Helvetica", sans-serif;
+  font-size: 60px;
+  font-weight: 800;
+  color: #4dc753;
+  margin-bottom: 20px;
+}
+.user-info {
+  position: absolute;
+  top: 70px; /* Ajusta según el tamaño del navbar */
+  right: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.user-name {
+  margin-right: 10px; /* Espacio entre el nombre y el avatar */
+  font-size: 18px;
+  font-weight: bold;
+  color: #333; /* Color del texto del nombre del usuario */
+}
+
+.avatar {
+  margin-left: 10px;
+}
+.botones {
+  position: absolute;
+  top: 160px; /* Coloca los botones debajo del avatar */
+  right: 40px;
+  display: flex;
+  flex-direction: column; /* Organiza los botones en columna */
+  justify-content: flex-start; /* Alinea los botones al inicio de la columna */
+  align-items: center;
+  margin-top: 20px;
+}
+
+.button {
+  display: flex;
+  flex-direction: column; /* Alinea el icono y el texto en columna */
+  align-items: center;
+  margin-bottom: 10px; /* Espacio entre los botones */
+  text-decoration: none; /* Elimina el subrayado de los enlaces */
 }
 
 .fondo {
@@ -81,7 +178,16 @@ export default {
   padding: 30px;
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
 }
-
+body {
+  background-color: #f0f0f0;
+  color: #333;
+  font-family: Arial, sans-serif;
+}
+.text {
+  margin-top: 5px; /* Espacio entre el icono y el texto */
+  font-size: 14px;
+  color: black;
+}
 .title {
   text-align: center;
   font-family: "Helvetica", sans-serif;
@@ -119,31 +225,5 @@ export default {
 
 .form-container {
   margin-top: 20px;
-  display: flex;
-  justify-content: space-between;
-  width: 100%; /* Ensure the form takes the full width of the container */
-}
-
-.input-subject {
-  flex: 1;
-  padding: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-right: 10px;
-}
-
-.btn-add {
-  padding: 5px 10px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.btn-add:hover {
-  background-color: #45a049;
 }
 </style>

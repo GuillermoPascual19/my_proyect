@@ -5,17 +5,6 @@
       <p class="msg">Write your new password.</p>
       <div class="form-grid">
         <div class="form-group">
-          <label class="form-label">Access Token</label>
-          <input
-            v-model="access_token"
-            class="form-input"
-            type="text"
-            id="accessToken"
-            required
-            placeholder="Access Token"
-          />
-        </div>
-        <div class="form-group">
           <label class="form-label">New password</label>
           <input
             v-model="newPassword"
@@ -50,17 +39,21 @@ import UserService from "@/services/user/user.service.ts";
 export default {
   data() {
     return {
-      access_token: "",
+      password_token: "",
       newPassword: "",
       passwordRepeat: "",
     };
+  },
+  mounted: function () {
+    this.password_token = this.$route.query.token;
   },
   methods: {
     //Enviamos una solicitud POST a la ruta /recover-password del backend con el correo electrónico del usuario.
     //Manejamos el estado de éxito y error para proporcionar retroalimentación al usuario.
     async changePassword() {
-      if (!this.access_token) {
-        console.log("Access Token is required");
+      if (!this.password_token) {
+        console.log("Password Token is required");
+        console.error("Password Token is required");
         return;
       }
       //ValidatePassword
@@ -92,7 +85,7 @@ export default {
       }
       try {
         const response = await UserService.changePassword({
-          access_token: this.access_token,
+          password_token: this.password_token,
           password: this.newPassword,
           passwordRepeat: this.passwordRepeat,
         });

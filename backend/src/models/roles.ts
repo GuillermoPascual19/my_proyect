@@ -1,5 +1,5 @@
 import { Optional } from 'sequelize';
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, HasMany } from 'sequelize-typescript';
 import sequelize from '../config/database';
 
 // Definir los atributos que tendrá el modelo User
@@ -17,11 +17,12 @@ interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
 export class Roles extends Model<Roles, UserCreationAttributes> {
   @PrimaryKey
   @AutoIncrement
+  @HasMany(() => Roles)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
-  id!: number;
+  declare id: number;
 
   @Column({
     type: DataType.STRING,
