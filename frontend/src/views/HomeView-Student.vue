@@ -2,7 +2,7 @@
   <div class="app">
     <div class="user-info">
       <span class="user-name">{{ userName }}</span>
-      <v-avatar class="avatar" size="80" color="grey">
+      <v-avatar class="avatar" size="80" color="grey" @click="gotoProfile">
         <v-img :src="profilePictureUrl"></v-img>
       </v-avatar>
     </div>
@@ -32,10 +32,8 @@
         <span class="text">Close Session</span>
       </router-link>
     </div>
-
     <div class="fondo">
       <h1 class="title">Student</h1>
-      <h3 class="subtitle">Asignaturas</h3>
       <table class="subjects-table">
         <thead>
           <tr>
@@ -46,11 +44,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="subject in subjects" :key="subject.id">
-            <td>{{ subject.name_teacher }}</td>
-            <td>{{ subject.surname_teacher }}</td>
-            <td>{{ subject.email_teacher }}</td>
-            <td>{{ subject.name_subject }}</td>
+          <tr v-for="prof in profesors" :key="prof.email">
+            <td>{{ prof.name }}</td>
+            <td>{{ prof.surname }}</td>
+            <td>{{ prof.email }}</td>
+            <td>{{ prof.name_subject }}</td>
           </tr>
         </tbody>
       </table>
@@ -64,13 +62,28 @@ import authService from "../services/auth/auth.service";
 
 export default {
   data: () => ({
-    subjects: [],
-    user_id: "",
+    profesors: [],
     selectedFile: null,
     profilePictureUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
+    user_id: "",
     userName: "",
+    loading: true,
   }),
   methods: {
+    gotoProfile() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) {
+        console.log("No user, please login");
+        console.error("No user, please login");
+        this.router.push("/login");
+      } else {
+        if (user.role === 1) {
+          this.router.push("/profileSt?token=" + user.access_token);
+        } else {
+          this.router.push("/profileTe?token=" + user.access_token);
+        }
+      }
+    },
     getUserName() {
       try {
         const user = JSON.parse(localStorage.getItem("user"));
@@ -82,7 +95,7 @@ export default {
         }
       } catch (error) {
         console.error("Error al obtener el nombre del usuario:", error);
-        this.userName = "Usuario"; // Nombre predeterminado en caso de error
+        this.userName = "Usuario";
       }
     },
     async cerrarSesion() {
@@ -95,15 +108,36 @@ export default {
       }
     },
     async fetchSubjects() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      console.log("Fetching subjects for student...", user.id);
+      this.loading = false;
       try {
-        const response = await userService.getSubjectsByStudent(this.user_id);
-        this.subjects.email_teacher = response.data.subject_email;
-        this.subjects.name_subject = response.data.subject_name;
-        this.subjects.name_teacher = response.data.name_teacher;
-        this.subjects.surname_teacher = response.data.surname_teacher;
+        const response = await userService.getSubjectsByStudent(user.id);
+
+        if (
+          !response.data ||
+          response.data.length === 0 ||
+          response.data === ""
+        ) {
+          this.profesors.email = "-";
+          this.profesors.name = "-";
+          this.profesors.surname = "-";
+          this.profesors.subjects = "-";
+          console.log("No data received");
+        }
+        this.profesors.name = response.data.name;
+        this.profesors.surname = response.data.surname;
+        this.profesors.email = response.data.email;
+        this.profesors.name_subject = response.data.name_subject;
+        this.profesors = response.data;
+        console.log("Formatted students:", this.profesors);
       } catch (error) {
         console.error("Error fetching subjects:", error);
       }
+    },
+    async changeCredentials() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      this.$router.push("/settings?token=" + user.access_token);
     },
   },
   mounted() {

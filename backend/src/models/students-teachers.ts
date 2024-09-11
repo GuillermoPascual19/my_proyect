@@ -1,8 +1,17 @@
-import { DataTypes, Optional } from 'sequelize';
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
-import sequelize from '../config/database';
-import User from './user';
-import Subject from './subjects';
+import { DataTypes, Optional } from "sequelize";
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  PrimaryKey,
+  AutoIncrement,
+  ForeignKey,
+  BelongsTo,
+} from "sequelize-typescript";
+import sequelize from "../config/database";
+import User from "./user";
+import Subject from "./subjects";
 // Definir los atributos que tendrá el modelo User
 interface UserAttributes {
   id: number;
@@ -12,45 +21,48 @@ interface UserAttributes {
 }
 
 // Define una interfaz para la creación de usuarios
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
 
 @Table({
   timestamps: false, // Desactivar timestamps a nivel de tabla
-  tableName: 'Students_Teachers',
+  tableName: "Students_Teachers",
 })
-export class Students_teachers extends Model<Students_teachers, UserCreationAttributes> {
+export class Students_teachers extends Model<
+  Students_teachers,
+  UserCreationAttributes
+> {
   [x: string]: any;
   @PrimaryKey
   @AutoIncrement
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
+  @Column({})
   declare id: number;
 
   @ForeignKey(() => User)
-  @BelongsTo(() => User)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   id_student!: number;
-
+  @BelongsTo(() => User, { foreignKey: "id_student", as: "studentTeachers" })
+  StudentUser!: User;
+  
   @ForeignKey(() => User)
-  @BelongsTo(() => User)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   id_teacher!: number;
+  @BelongsTo(() => User, { foreignKey: "id_teacher", as: "teacherStudents" })
+  teacher!: User;
 
   @ForeignKey(() => Subject)
-  @BelongsTo(() => Subject)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   id_subject!: number;
+  @BelongsTo(() => Subject, { foreignKey: "id_subject", as: "subjectStdTe" })
+  subjectStdTe!: Subject;
 }
 
 export default Students_teachers;

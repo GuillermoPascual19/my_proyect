@@ -2,7 +2,7 @@
   <div class="app">
     <div class="user-info">
       <span class="user-name">{{ userName }}</span>
-      <v-avatar class="avatar" size="80" color="grey" @click="gotoProfile">
+      <v-avatar class="avatar" size="80" color="grey">
         <v-img :src="profilePictureUrl"></v-img>
       </v-avatar>
     </div>
@@ -58,3 +58,186 @@
     </div>
   </div>
 </template>
+<script>
+import userService from "../services/user/user.service";
+import authService from "../services/auth/auth.service";
+// import FileAgent from "vue-file-agent";
+// import "vue-file-agent/dist/vue-file-agent.css";
+
+export default {
+  data: () => ({
+    students: [],
+    selectedFile: null,
+    profilePictureUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
+    userName: "",
+  }),
+  methods: {
+    getUserName() {
+      try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user && user.name && user.surname) {
+          this.userName = user.userName + " ";
+          this.name = user.name + "";
+          this.surname = user.surname + "";
+          this.email = user.email + "";
+          this.role = user.rol + "";
+        } else {
+          this.userName = "Usuario";
+        }
+      } catch (error) {
+        console.error("Error al obtener el nombre del usuario:", error);
+        this.userName = "Usuario"; // Nombre predeterminado en caso de error
+      }
+    },
+    async fetchAsignaturas() {
+      try {
+        const response = await userService.getStudents();
+        this.students.value = response.data;
+      } catch (error) {
+        console.error("Error al obtener las asignaturas:", error);
+      }
+    },
+    async cerrarSesion() {
+      try {
+        await authService.logout();
+        localStorage.removeItem("user");
+        this.$router.push("/login");
+      } catch (error) {
+        console.error("Error al cerrar sesión:", error);
+      }
+    },
+    async changeCredentials() {
+      this.$router.push("/settings");
+    },
+    // async onFileSelected() {
+    //   if (!this.selectedFile || this.selectedFile.length === 0) {
+    //     return;
+    //   }
+
+    //   const formData = new FormData();
+    //   formData.append("image", this.selectedFile[0].file);
+    //   formData.append("access_token", "your_access_token_here");
+
+    //   try {
+    //     const response = await userService.uploadImage(formData);
+    //     this.profilePictureUrl = response.data.imageUrl; // Assuming the server returns the URL of the uploaded image
+    //   } catch (error) {
+    //     console.error("Error uploading profile picture:", error);
+    //   }
+    // },
+  },
+  mounted() {
+    this.getUserName();
+    this.fetchAsignaturas();
+  },
+  components: {
+    // VueFileAgent: FileAgent,
+  },
+};
+</script>
+<style scoped>
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 90vh;
+  background-color: #f1f7ef;
+  margin: 0;
+  padding-top: 100px;
+}
+.title {
+  text-align: center;
+  font-family: "Helvetica", sans-serif;
+  font-size: 60px;
+  font-weight: 800;
+  color: #4dc753;
+  margin-bottom: 20px;
+}
+.subtitle {
+  color: #45a049;
+}
+.user-info {
+  position: absolute;
+  top: 70px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.user-name {
+  margin-right: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.avatar {
+  margin-left: 10px;
+}
+.fondo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 900px;
+  background: rgba(19, 35, 47, 0.9);
+  border-radius: 5px;
+  padding: 55px;
+  box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
+  margin-top: 80px;
+}
+.btn-refresh {
+  position: absolute;
+  top: 20px;
+  right: 55px;
+  background-color: #8ec08f;
+  color: rgb(83, 80, 80);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.botones {
+  position: absolute;
+  top: 160px;
+  right: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+  text-decoration: none;
+}
+.botonesAsignaturas {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+body {
+  background-color: #ffffff;
+  color: #333;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  color: #555;
+}
+
+.text {
+  margin-top: 5px;
+  font-size: 14px;
+  color: black;
+}
+</style>

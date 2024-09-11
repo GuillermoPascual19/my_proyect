@@ -18,7 +18,7 @@
       </router-link>
     </div>
     <h1 class="title" msg=""></h1>
-    <form class="form" @submit.prevent="changeInfo">
+    <form class="form">
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">Name</label>
@@ -67,11 +67,11 @@
           </flowbite-themable>
         </div>
         <div class="form-group full-width">
-          <v-btn class="ma-2" color="green">
+          <v-btn class="ma-2" color="green" @click="ChangeInfo">
             Accept
             <v-icon icon="mdi-checkbox-marked-circle" end></v-icon>
           </v-btn>
-          <v-btn class="ma-2" color="red">
+          <v-btn class="ma-2" color="red" @click="cancelChange">
             Decline
             <v-icon icon="mdi-cancel" end></v-icon>
           </v-btn>
@@ -120,6 +120,32 @@ export default {
   },
   //Methods
   methods: {
+    getUserName() {
+      try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user && user.name && user.surname) {
+          this.userName = user.name + " " + user.surname;
+        } else {
+          this.userName = "Usuario";
+        }
+      } catch (error) {
+        console.error("Error al obtener el nombre del usuario:", error);
+        this.userName = "Usuario"; // Nombre predeterminado en caso de error
+      }
+    },
+    gotoProfile() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) {
+        console.log("User not found, go to login");
+        console.error("User not found, go to login");
+        this.$router.push("/login");
+      }
+      if (user && user.role === 1) {
+        this.$router.push("/profileSt?token=" + user.access_token);
+      } else {
+        this.$router.push("/profileTe?token=" + user.access_token);
+      }
+    },
     async changeInfo() {
       console.log(this.name);
       console.log(this.surname);
@@ -144,17 +170,32 @@ export default {
       }
       console.log("All fields are correct and validated correctly");
       try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) {
+          console.log("User not found");
+          return;
+        }
+        if (this.selected === "") {
+          this.selected = user.role;
+        } else if (this.name === "") {
+          this.name = user.name;
+        } else if (this.surname === "") {
+          this.surname = user.surname;
+        } else if (this.email === "") {
+          this.email = user.email;
+        }
         this.rol = this.selected;
         const response = await userService.changeCredentials({
           name: this.name,
           surname: this.surname,
           email: this.email,
-          role: this.rol,
+          role: this.selected,
+          id: user.id,
         });
-        if (this.rol === "1") {
-          this.$router.push("/student");
+        if (user.role === "1") {
+          this.$router.push("/student?token=" + user.access_token);
         } else {
-          this.$router.push("/teacher");
+          this.$router.push("/teacher?token=" + user.access_token);
         }
         console.log(response);
         this.message = response.message;
@@ -165,17 +206,21 @@ export default {
           : "Server error";
       }
     },
-    getUserName() {
-      try {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (user && user.name && user.surname) {
-          this.userName = user.name + " " + user.surname;
-        } else {
-          this.userName = "Usuario";
-        }
-      } catch (error) {
-        console.error("Error al obtener el nombre del usuario:", error);
-        this.userName = "Usuario"; // Nombre predeterminado en caso de error
+    cancelChange() {
+      this.name = "";
+      this.surname = "";
+      this.email = "";
+      this.selected = "";
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) {
+        console.log("User not found");
+        this.$router.push("/login");
+        return;
+      }
+      if (user.role === "1") {
+        this.$router.push("/student?token=" + user.access_token);
+      } else {
+        this.$router.push("/teacher?token=" + user.access_token);
       }
     },
     async cerrarSesion() {

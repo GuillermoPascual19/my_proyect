@@ -1,8 +1,7 @@
 <template>
   <div class="app">
-    <!-- Mueve el avatar y el nombre fuera del contenedor "fondo" -->
     <div class="user-info">
-      <v-avatar class="avatar" size="80" color="grey" @click="gotoProfile">
+      <v-avatar class="avatar" size="80" color="grey">
         <v-img :src="profilePictureUrl"></v-img>
       </v-avatar>
       <span class="user-name">{{ userName }}</span>
@@ -29,34 +28,74 @@
       </router-link>
     </div>
 
-    <!-- Contenedor "fondo" -->
-    <div class="fondo">
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Username</label>
-          <label id="username" class="form-input" msg=""></label>
-          <span class="username">{{ username }}</span>
+    <div class="content-wrapper">
+      <div class="fondo">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Username: </label>
+            <label id="username" class="form-input"></label>
+            <span class="valores"> {{ username }}</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Name: </label>
+            <label id="name" class="form-input"></label>
+            <span class="valores"> {{ name }}</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name: </label>
+            <label id="surname" class="form-input"></label>
+            <span class="valores"> {{ surname }}</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email: </label>
+            <label id="dirCorreo" class="form-input"></label>
+            <span class="valores"> {{ dirCorreo }}</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Role: </label>
+            <label id="role" class="form-input"></label>
+            <span class="valores"> {{ role }}</span>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Name</label>
-          <label id="name" class="form-input" msg=""></label>
-          <span class="name">{{ name }}</span>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Last Name</label>
-          <label id="surname" class="form-input" msg=""></label>
-          <span class="surname">{{ surname }}</span>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <label id="dirCorreo" class="form-input" msg=""></label>
-          <span class="dirCorreo">{{ dirCorreo }}</span>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Role</label>
-          <label id="role" class="form-input" msg=""></label>
-          <span class="role">{{ role }}</span>
-        </div>
+      </div>
+
+      <div class="fondo2">
+        <button class="btn-refresh" @click="fetchStudents">
+          <v-icon>mdi-refresh</v-icon>
+        </button>
+        <v-data-table-server
+          v-model:items-per-page="itemsPerPage"
+          :headers="headers"
+          :items="serverItems"
+          :items-length="totalItems"
+          :loading="loading"
+          :search="search"
+          item-value="name"
+          @update:options="loadItems"
+        >
+          <template v-slot:tfoot>
+            <tr>
+              <td>
+                <v-text-field
+                  v-model="search.name"
+                  @input="loadItems"
+                  class="ma-2"
+                  density="compact"
+                  placeholder="Search name..."
+                  hide-details
+                ></v-text-field>
+              </td>
+            </tr>
+          </template>
+        </v-data-table-server>
+      </div>
+      <div class="fileSelector">
+        <input
+          type="file"
+          class="input-subject"
+          @change="onFileSelected"
+          accept="image/*"
+        />
       </div>
     </div>
   </div>
@@ -65,8 +104,8 @@
 <script>
 import userService from "../services/user/user.service";
 import authService from "../services/auth/auth.service";
-// import FileAgent from "vue-file-agent";
-// import "vue-file-agent/dist/vue-file-agent.css";
+import FileAgent from "vue-file-agent";
+import "vue-file-agent/dist/vue-file-agent.css";
 
 export default {
   data: () => ({
@@ -74,34 +113,36 @@ export default {
     selectedFile: null,
     profilePictureUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
     userName: "",
+    itemsPerPage: 5,
+    headers: [
+      { title: "Name subject", key: "subject_name", align: "end" },
+      { title: "Number of students", key: "num_students", align: "end" },
+    ],
+    serverItems: [],
+    loading: true,
+    totalItems: 0,
+    name: "",
+    search: {
+      subject_name: "",
+    },
   }),
   methods: {
-    gotoProfile() {
-      this.$router.push("/profile");
-    },
     getUserName() {
       try {
         const user = JSON.parse(localStorage.getItem("user"));
-        if (user && user.name && user.surname) {
-          this.userName = user.userName + " ";
+        if (user) {
+          this.username = user.username + " ";
+          this.userName = user.name + " " + user.surname;
           this.name = user.name + "";
           this.surname = user.surname + "";
-          this.email = user.email + "";
-          this.role = user.rol + "";
+          this.dirCorreo = user.email + "";
+          this.role = user.role + "";
         } else {
           this.userName = "Usuario";
         }
       } catch (error) {
         console.error("Error al obtener el nombre del usuario:", error);
-        this.userName = "Usuario"; // Nombre predeterminado en caso de error
-      }
-    },
-    async fetchAsignaturas() {
-      try {
-        const response = await userService.getStudents();
-        this.students.value = response.data;
-      } catch (error) {
-        console.error("Error al obtener las asignaturas:", error);
+        this.userName = "Usuario";
       }
     },
     async cerrarSesion() {
@@ -114,28 +155,104 @@ export default {
       }
     },
     async changeCredentials() {
-      this.$router.push("/settings");
+      const user = JSON.parse(localStorage.getItem("user"));
+      this.$router.push("/settings?token=" + user.access_token);
     },
-    // async onFileSelected() {
-    //   if (!this.selectedFile || this.selectedFile.length === 0) {
-    //     return;
-    //   }
+    async fetchStudents() {
+      try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        const response = await userService.getNumStudentsPerSubject(user.id);
 
-    //   const formData = new FormData();
-    //   formData.append("image", this.selectedFile[0].file);
-    //   formData.append("access_token", "your_access_token_here");
+        if (Array.isArray(response.data)) {
+          this.students = response.data.map((subject) => ({
+            subject_name: subject.subject_name,
+            num_students: subject.num_students,
+          }));
+          console.log("Students2:", this.students);
+          this.serverItems = [...this.students];
+          this.totalItems = this.students.length;
+          this.loading = false;
+        } else {
+          console.error("Unexpected data format:", response.data);
+        }
+      } catch (error) {
+        console.error(
+          "Error al obtener los datos de los alumnos y su asignatura:",
+          error
+        );
+      }
+    },
+    loadItems({ page, itemsPerPage, sortBy, search }) {
+      this.loading = true;
 
-    //   try {
-    //     const response = await userService.uploadImage(formData);
-    //     this.profilePictureUrl = response.data.imageUrl; // Assuming the server returns the URL of the uploaded image
-    //   } catch (error) {
-    //     console.error("Error uploading profile picture:", error);
-    //   }
-    // },
+      const start = (page - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      let items = [...this.students];
+
+      console.log("Funciona", this.search);
+      // Búsqueda
+      if (search.name) {
+        items = items.filter((student) =>
+          student.name.toLowerCase().includes(search.name.toLowerCase())
+        );
+      }
+      if (search.email) {
+        items = items.filter((student) =>
+          student.email.toLowerCase().includes(search.email.toLowerCase())
+        );
+      }
+
+      // Ordenación
+      if (sortBy.length) {
+        const sortKey = sortBy[0].key;
+        const sortOrder = sortBy[0].order;
+
+        items.sort((a, b) => {
+          if (a[sortKey] < b[sortKey]) return sortOrder === "asc" ? -1 : 1;
+          if (a[sortKey] > b[sortKey]) return sortOrder === "asc" ? 1 : -1;
+          return 0;
+        });
+      }
+
+      const paginatedItems = items.slice(start, end);
+      this.serverItems = paginatedItems;
+      this.totalItems = items.length;
+      this.loading = false;
+    },
+    async onFileSelected() {
+      if (!this.selectedFile || this.selectedFile.length === 0) {
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("image", this.selectedFile[0].file);
+      formData.append("access_token", "your_access_token_here");
+
+      try {
+        const response = await userService.uploadImage(formData);
+        this.profilePictureUrl = response.data.imageUrl; // Assuming the server returns the URL of the uploaded image
+      } catch (error) {
+        console.error("Error uploading profile picture:", error);
+      }
+    },
+  },
+  async fetch({ page, itemsPerPage, sortBy, search }) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const start = (page - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        let items = this.students.slice();
+
+        this.loadItems({ page, itemsPerPage, sortBy, search });
+
+        const paginated = items.slice(start, end);
+        resolve({ items: paginated, total: items.length });
+      }, 500);
+    });
   },
   mounted() {
     this.getUserName();
-    this.fetchAsignaturas();
+    this.fetchStudents();
   },
   components: {
     // VueFileAgent: FileAgent,
@@ -149,7 +266,7 @@ export default {
   flex-direction: column;
   align-items: center;
   min-height: 90vh;
-  background-color: #f8f9fa;
+  background-color: #f1f7ef;
   padding-top: 100px;
   position: relative;
 }
@@ -185,15 +302,24 @@ export default {
 
 .button {
   display: flex;
+  flex-direction: column;
   align-items: center;
   margin-bottom: 10px;
   text-decoration: none;
 }
 
 .text {
-  margin-left: 5px;
+  margin-top: 5px;
   font-size: 14px;
   color: black;
+}
+
+.content-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 1400px;
 }
 
 .fondo {
@@ -204,32 +330,58 @@ export default {
   border-radius: 5px;
   padding: 30px;
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
-  width: 800px;
-  margin-top: 100px; /* Añade un margen superior para que el avatar quede encima */
+  width: 500px;
+  height: 200px;
+  margin-top: 100px;
 }
 
-.subjects-table {
+.form-grid {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 20px;
+  align-items: center;
   width: 100%;
-  margin-top: 20px;
-  border-collapse: collapse;
+  max-width: 600px;
 }
 
-.subjects-table th,
-.subjects-table td {
-  padding: 10px;
-  text-align: left;
+.form-label {
+  text-align: right;
+  color: white;
+  font-style: italic;
+  padding-right: 20px;
+}
+
+.valores {
+  background-color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: black;
   border: 1px solid #ccc;
+  text-align: left;
 }
 
-.subjects-table th {
-  background-color: #e0e0e0;
+.fondo2 {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 900px;
+  background: rgba(19, 35, 47, 0.9);
+  border-radius: 5px;
+  padding: 55px;
+  box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
+  margin-top: 80px;
 }
-
-.subjects-table tbody tr:nth-child(odd) {
-  background-color: #f9f9f9;
-}
-
-.subjects-table tbody tr:nth-child(even) {
-  background-color: #f0f0f0;
+.btn-refresh {
+  position: absolute;
+  top: 20px;
+  right: 55px;
+  background-color: #8ec08f;
+  color: rgb(83, 80, 80);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>

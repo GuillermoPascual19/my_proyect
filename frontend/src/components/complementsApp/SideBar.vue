@@ -8,10 +8,10 @@
 
     <h3>Menu</h3>
     <div class="menu">
-      <router-link to="/" class="button">
+      <button class="button" @click="goToHome">
         <v-icon large>mdi-home</v-icon>
         <span class="text">Home</span>
-      </router-link>
+      </button>
       <router-link to="/about" class="button">
         <v-icon>mdi-eye</v-icon>
         <span class="text">About</span>
@@ -29,22 +29,49 @@
     <div class="flex"></div>
 
     <div class="menu">
-      <router-link to="/changeCredentials" class="button">
+      <button class="button" @click="goToChangeCredentials">
         <v-icon>mdi-wrench</v-icon>
         <span class="text">Settings</span>
-      </router-link>
+      </button>
     </div>
   </aside>
 </template>
 
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
 const is_expanded = ref(localStorage.getItem("is_expanded") === "true");
 
 const ToggleMenu = () => {
   is_expanded.value = !is_expanded.value;
   localStorage.setItem("is_expanded", is_expanded.value);
+};
+
+const router = useRouter();
+const goToHome = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) {
+    console.log("No user, please login");
+    console.error("No user, please login");
+    router.push("/login");
+  } else {
+    if (user.role === 1) {
+      router.push("/student?token=" + user.access_token);
+    } else {
+      router.push("/teacher?token=" + user.access_token);
+    }
+  }
+};
+const goToChangeCredentials = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) {
+    console.log("No user, please login");
+    console.error("No user, please login");
+    router.push("/login");
+  } else {
+    router.push("/settings");
+  }
 };
 </script>
 

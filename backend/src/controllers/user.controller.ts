@@ -1,15 +1,17 @@
-import { Request, Response } from "express";
-import { User } from "../models/user";
+import e, { Request, Response } from "express";
+import User from "../models/user";
 import Session from "../models/session";
-import { Students_teachers } from "../models/students-teachers"; // Adjust the import based on your project structure
-import Subjects from "../models/subjects"; // Adjust the import based on your project structure
-import utils from "../utils/utils"; // Adjust the import based on your project structure
+import Students_teachers from "../models/students-teachers";
+import Subject from "../models/subjects";
+import utils from "../utils/utils";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import path from "path";
 import Inspector from "inspector";
+import Roles from "../models/roles";
+import sequelize from "../config/database";
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -116,7 +118,19 @@ export const registerUser = async (req: Request, res: Response) => {
         active: false,
         image: "",
       });
-
+      if (role === 1) {
+        const newStudent = await Students_teachers.create({
+          id_student: newUser.id,
+          id_teacher: 0, // Provide the id_teacher value here
+          id_subject: 0, // Provide the id_subject value here
+        });
+      } else if (role === 2) {
+        const newTeacher = await Students_teachers.create({
+          id_student: 0, // Provide the id_student value here
+          id_teacher: newUser.id,
+          id_subject: 0, // Provide the id_subject value here
+        });
+      }
       sendWelcomeEmail(newUser); // Envía un correo de bienvenida al usuario
 
       console.log("New user created:", newUser); // Log para verificar la inserción
@@ -156,7 +170,7 @@ export const loginUser = async (req: Request, res: Response) => {
         console.error("Error creating session:", error); // Log para capturar el error
         return res.status(550).json({ message: "CAFE Server error", error });
       }
-      
+
       console.log(user);
       bcrypt
         .compare(password, user.dataValues.password)
@@ -167,7 +181,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
           if (user.active === false) {
             return res.status(404).send("User not activated");
-          } 
+          }
 
           // Generar el JWT
           const loginToken = jwt.sign(
@@ -182,7 +196,8 @@ export const loginUser = async (req: Request, res: Response) => {
             process.env.JWT_SECRET || "secret", // Asegúrate de usar una clave secreta segura
             { expiresIn: "1h" }
           );
-          console.log("User logged in successfully"); // Log para verificar
+          console.log("User logged in successfully");
+
           return res
             .status(200)
 
@@ -346,54 +361,58 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
-//Obtener asignaturas por estudiante----------------------------------------------
+//Obtener asignaturas y su respectivo profesor por estudiante----------------------------------------------
 export const getSubjectsByStudent = async (req: Request, res: Response) => {
-  const { id } = req.params;
-
-  if (!id) {
-    return res.status(400).send("User id is required");
-  }
-
+  const { id } = req.body;
   try {
-    // Verificar si el usuario existe
     const user = await User.findOne({ where: { id } });
     if (!user) {
       return res.status(404).send("User not found");
     }
-
-    // Obtener las asignaturas y los profesores que las imparten
     const subjectsWithTeachers = await Students_teachers.findAll({
       where: { id_student: id },
       include: [
         {
-          model: Subjects,
-          attributes: ["id", "subject_name"],
+          model: Subject,
+          attributes: ["subject_name"],
+          as: "subjectStdTe",
         },
         {
-          model: User, // Incluimos el modelo de Usuarios para obtener datos del profesor
-          as: "Teacher",
-          attributes: ["name", "surname", "email"], // Update the attributes to include 'surname'
+          model: User,
+          as: "teacherStudents",
+          where: { role: 2 },
+          attributes: ["name", "surname", "email"],
         },
       ],
     });
 
-    if (!subjectsWithTeachers.length) {
-      return res.status(404).send("No subjects found for this user");
-    } 
+    if (!subjectsWithTeachers || !subjectsWithTeachers.length) {
+      console.log("No subjects found for this user");
+      const temp: [] = [];
+      return res
+        .status(200)
+        .send({ tem: "No subjects found for this user", temp });
+    }
+    const studentData = subjectsWithTeachers
+      .map((prof) => {
+        const subjectName = prof.subjectStdTe?.subject_name || "-";
+        const teachers =
+          prof.teacherStudents && prof.teacherStudents.length > 0
+            ? prof.teacherStudents
+            : [{ name: "-", surname: "-", email: "-" }];
 
-    // Mapear y organizar los datos en el formato deseado
-    const result = subjectsWithTeachers.map((st) => ({
-      name: st.Subject.subject_name,
-      teachers: st.Subject.Teachers.map(
-        (t: { Teacher: { id: any; name: any; surname: any; email: any } }) => ({ // Update the type declaration for 't.Teacher'
-          name: t.Teacher.name,
-          surname: t.Teacher.surname,
-          email: t.Teacher.email,
-        })
-      ),
-    }));
-
-    res.json(result);
+        return teachers.map(
+          (teacher: { name: any; surname: any; email: any }) => ({
+            name: teacher.name || "-",
+            surname: teacher.surname || "-",
+            email: teacher.email || "-",
+            subject: subjectName,
+          })
+        );
+      })
+      .flat();
+    console.log("Student subjects:", studentData);
+    res.json(studentData);
   } catch (error) {
     console.error("Error getting subjects and teachers:", error);
     return res.status(500).json({ message: "Server error", error });
@@ -403,20 +422,19 @@ export const getSubjectsByStudent = async (req: Request, res: Response) => {
 //Obtener estudiantes----------------------------------------------
 export const getStudents = async (req: Request, res: Response) => {
   try {
-    console.log("Getting students..."); // Log para verificar
-    // Obtener estudiantes inscritos en la asignatura
+    console.log("Getting students");
     const students = await User.findAll({
-      where: { role: 1 }, // Asumiendo que el rol 1 es el de estudiante
-      attributes: ['name', 'surname', 'email'], // Seleccionamos los campos del alumno
+      where: { role: 1 },
+      attributes: ["name", "surname", "email"],
       include: [
         {
           model: Students_teachers,
-          as: 'student_teachers', // Esto debe coincidir con el alias utilizado en las asociaciones de tu modelo
+          as: "studentTeachers",
           include: [
             {
-              model: Subjects,
-              as: 'subject', // Esto debe coincidir con el alias utilizado en las asociaciones de tu modelo
-              attributes: ['subject_name'], // Seleccionamos el nombre de la asignatura
+              model: Subject,
+              as: "subjectStdTe",
+              attributes: ["subject_name"],
             },
           ],
         },
@@ -425,34 +443,250 @@ export const getStudents = async (req: Request, res: Response) => {
     if (!students || !students.length) {
       return res.status(404).send("No students found.");
     }
-    console.log("Students found successfully"); // Log para verificar
-    const studentData = students.map(student => {
+
+    const studentData = students.map((student) => {
+      const temp = student.get({ plain: true });
+      console.log("Student:", temp);
+      const subjects =
+        temp.studentTeachers.length > 0
+          ? temp.studentTeachers.map(
+              (st) => st.subjectStdTe?.subject_name || " -"
+            )
+          : " - ";
       return {
-        name: student.name,
-        surnames: student.surname,
-        email: student.email,
-        subjects: student.student_teachers.subject.map((st: { subject: { subject_name: any; }; }) => st.subject.subject_name), // Obtenemos el nombre de las asignaturas
+        name: temp.name,
+        surname: temp.surname,
+        email: temp.email,
+        subjects: subjects,
       };
     });
-    res.json(studentData);
+    console.log("Student subjects:", studentData);
+    return res.status(200).json(studentData);
   } catch (error) {
     console.error("Error getting students:", error);
     return res.status(500).json({ message: "Server error", error });
   }
 };
+//Cerrar sesión----------------------------------------------
+export const closeSession = async (req: Request, res: Response) => {
+  const id = req.user.id;
 
+  try {
+    const user = await Session.destroy({ where: { id_user: id } });
+    console.log("User logged out successfully");
+    res.status(200).send("User logged out successfully");
+  } catch (error) {
+    console.error("Error logging out:", error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
+
+//Cambiar credenciales----------------------------------------------
+export const changeCrendentials = async (req: Request, res: Response) => {
+  const { email, name, surname, rol, id } = req.body;
+
+  if (!email && !name && !surname && !rol && !id) {
+    return res
+      .status(400)
+      .send("Credentials is required for changing user credentials");
+  }
+
+  try {
+    const user = await User.findOne({ where: { id } });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    user.role = rol;
+    user.email = email;
+    user.name = name;
+    user.surname = surname;
+    await user.save();
+
+    try {
+      // Generar el JWT
+      const loginToken = jwt.sign(
+        {
+          id: user.id,
+          username: user.username,
+          name: user.name,
+          surname: user.surname,
+          email: user.email,
+          role: user.role,
+        },
+        process.env.JWT_SECRET || "secret", // Asegúrate de usar una clave secreta segura
+        { expiresIn: "1h" }
+      );
+    } catch (error) {
+      console.error("Error generating token:", error);
+      return res.status(500).json({ message: "Server error", error });
+    }
+    console.log("User credentials changed successfully");
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error changing user credentials:", error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
+
+//Asignar asignatura----------------------------------------------
+export const assignSubject = async (req: Request, res: Response) => {
+  const { id, email, subject } = req.body;
+
+  if (!email || !subject || !id) {
+    console.log("Email, id, and subject are required");
+    return res.status(400).send("Email, id, and subject are required");
+  }
+
+  const transaction = await sequelize.transaction(); // Start transaction
+
+  try {
+    console.log(
+      "\n\n\nAssigning subject to student:------------------------\n\n\n"
+    );
+    const userStud = await User.findOne({ where: { email }, transaction });
+    if (!userStud) {
+      console.log("User student not found");
+      return res.status(404).send("User student not found");
+    }
+
+    const userTe = await User.findOne({ where: { id }, transaction });
+    if (!userTe) {
+      console.log("User teacher not found");
+      return res.status(404).send("User teacher not found");
+    }
+
+    let subjectsEntry = await Subject.findOne({
+      where: { subject_name: subject },
+      transaction,
+    });
+    if (!subjectsEntry) {
+      console.log("Creating new subject entry:", subject);
+      subjectsEntry = await Subject.create(
+        { subject_name: subject },
+        { transaction }
+      );
+    }
+
+    const comprobacion = await Students_teachers.findOne({
+      where: {
+        id_student: userStud.id,
+        id_teacher: userTe.id,
+        id_subject: subjectsEntry.id,
+      },
+      transaction,
+    });
+    if (comprobacion) {
+      return res.status(405).send("Subject already assigned to the student");
+    }
+    await Students_teachers.create(
+      {
+        id_student: userStud.id,
+        id_teacher: userTe.id,
+        id_subject: subjectsEntry.id,
+      },
+      { transaction }
+    );
+
+    await transaction.commit(); // Commit transaction
+
+    return res.status(200).send("Subject assigned successfully to the student");
+  } catch (error) {
+    await transaction.rollback(); // Rollback transaction in case of error
+    console.log("Error assigning subject:");
+    console.error("Error assigning subject:", error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
+
+//Desasignar asignatura----------------------------------------------
+export const unassignSubject = async (req: Request, res: Response) => {
+  const { id, email, subject } = req.body;
+
+  if (!email && !subject && !id) {
+    return res.status(400).send("Email and subject are required");
+  }
+
+  try {
+    const userStud = await User.findOne({ where: { email } });
+    if (!userStud) {
+      return res.status(404).send("User student not found");
+    }
+
+    const subjects = await Subject.findOne({
+      where: { subject_name: subject },
+    });
+    if (!subjects) {
+      return res.status(404).send("Subject not found");
+    }
+    const user = await Students_teachers.destroy({
+      where: {
+        id_student: userStud.id,
+        id_teacher: id,
+        id_subject: subjects.id,
+      },
+    });
+    return res
+      .status(200)
+      .send("Subject unassigned successfully to the student");
+  } catch (error) {
+    console.error("Error assigning subject:", error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
+//Conseguir el número de estudiantes por asignatura----------------------------------------------
+export const getNumStudentsPerSubject = async (req: Request, res: Response) => {
+  const { id } = req.body;
+  console.log("Getting students for teacher:", id);
+  try {
+
+    const subjectsCount = await Students_teachers.findAll({
+      where: { id_teacher: id },
+      attributes: [
+        'id_subject',
+        [sequelize.fn('COUNT', sequelize.col('id_student')), 'num_students'],
+      ],
+      group: ['id_subject', 'subjectStdTe.subject_name', 'subjectStdTe.id'], 
+      include: [
+        {
+          model: Subject,
+          as: "subjectStdTe",
+          attributes: ["subject_name"],
+        },
+      ],
+    });
+
+    if(!subjectsCount || subjectsCount.length === 0) {
+      return res.status(404).send("No students found.");
+    }
+    const result = subjectsCount.map((entry) => ({
+      subject_name: entry.dataValues.subjectStdTe.dataValues.subject_name || "-",
+      num_students: entry.dataValues.num_students,
+    })
+    );
+
+    if (!result || result.length === 0) {
+      return res.status(404).send("No students found for the given teacher.");
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error getting students:", error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
 //Subir imagen----------------------------------------------
 export const uploadImage = async (req: Request, res: Response) => {};
-// // Configure multer for file storage
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, path.join(__dirname, "../../uploads")); // Save in the 'uploads' directory
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, `${Date.now()}-${file.originalname}`);
-//   },
-// });
-// const upload = multer({ storage });
+// Configure multer for file storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "../../uploads")); // Save in the 'uploads' directory
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+// const upload = multer({ Storage: multer.diskStorage({});
 
 // export const uploadImage = async (req: Request, res: Response) => {
 //   const { access_token } = req.body;
@@ -487,64 +721,3 @@ export const uploadImage = async (req: Request, res: Response) => {};
 //     }
 //   });
 // };
-
-//Cerrar sesión----------------------------------------------
-export const closeSession = async (req: Request, res: Response) => {
-  const id = req.user.id;
-
-  try {
-    const user = await Session.destroy({ where: { id_user: id } });
-    console.log("User logged out successfully");
-    res.status(200).send("User logged out successfully");
-  } catch (error) {
-    console.error("Error logging out:", error);
-    return res.status(500).json({ message: "Server error", error });
-  }
-};
-
-//Cambiar credenciales----------------------------------------------
-export const changeCrendentials = async (req: Request, res: Response) => {
-
-  const { email, name, surname, rol } = req.body;
-
-  if (!email && !name && !surname && !rol) {
-    return res.status(400).send("Credentials is required for changing user credentials");
-  }
-
-  try {
-    const user = await User.findOne({ where: { email, name, surname } });
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    user.role = rol;
-    user.email = email;
-    user.name = name;
-    user.surname = surname;
-    await user.save();
-
-    try {
-    // Generar el JWT
-      const loginToken = jwt.sign(
-        {
-          id: user.id,
-          username: user.username,
-          name: user.name,
-          surname: user.surname,
-          email: user.email,
-          role: user.role,
-        },
-        process.env.JWT_SECRET || "secret", // Asegúrate de usar una clave secreta segura
-        { expiresIn: "1h" }
-      );
-    } catch (error) {
-      console.error("Error generating token:", error);
-      return res.status(500).json({ message: "Server error", error });
-    }
-    console.log("User credentials changed successfully");
-    res.status(200).json(user);
-  } catch (error) {
-    console.error("Error changing user credentials:", error);
-    return res.status(500).json({ message: "Server error", error });
-  }
-}

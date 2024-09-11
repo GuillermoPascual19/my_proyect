@@ -40,3 +40,4 @@ export class Students_teachers extends Model<Students_teachers, UserCreationAttr
 }
 
 export default Students_teachers;
+

@@ -41,14 +41,16 @@ interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
 })
 export class User extends Model<User, UserCreationAttributes> {
   [x: string]: any;
-  // [x: string]: any;
   @PrimaryKey
   @AutoIncrement
-  @HasMany(() => Students_teachers, 'id_student')
-  @HasMany(() => Students_teachers, 'id_teacher')
-  @HasMany(() => Session, 'id_user')
   @Column({})
   declare id: number;
+
+  @HasMany(() => Students_teachers, { foreignKey: "id_student", as: "studentTeachers" })
+  studentTeachers!: Students_teachers[];
+
+  @HasMany(() => Students_teachers, { foreignKey: "id_teacher", as: "teacherStudents" })
+  teacherStudents!: Students_teachers[];
 
   @Column({
     type: DataType.STRING,
@@ -93,12 +95,13 @@ export class User extends Model<User, UserCreationAttributes> {
   password_token!: string;
 
   @ForeignKey(() => Roles)
-  @BelongsTo(() => Roles)
   @Column({
-    type: DataType.STRING,
+    type: DataType.INTEGER,
     allowNull: false,
   })
-  role!: string;
+  role!: number;
+  @BelongsTo(() => Roles, { foreignKey: "role", as: "roles" })
+  roles!: Roles;
 
   @Column({
     type: DataType.BOOLEAN,

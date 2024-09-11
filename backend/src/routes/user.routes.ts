@@ -12,6 +12,9 @@ import {
   uploadImage,
   deleteUser,
   changeCrendentials,
+  assignSubject,
+  unassignSubject,
+  getNumStudentsPerSubject,
 } from "../controllers/user.controller";
 
 import { verifyToken } from "../middleware/logger.middleware";
@@ -20,8 +23,8 @@ const router = Router();
 
 // Rutas para usuarios
 router.post("/users", getAllUsers);
-router.post("/students", getStudents);
-router.post("/subjects", getSubjectsByStudent);
+router.post("/teachers", getStudents);
+router.post("/students", getSubjectsByStudent);
 router.post("/recover-password", recoverPassword);
 router.post("/register", registerUser);
 router.post("/activate-account", activateAccount);
@@ -31,6 +34,9 @@ router.delete("/users/:id", deleteUser);
 router.post("/upload-image", uploadImage);
 router.post("/closesession", [verifyToken], closeSession);
 router.post("/changeCredentials", [verifyToken], changeCrendentials);
+router.post("/assign-subject", assignSubject);
+router.post("/unassign-subject", unassignSubject);
+router.post("/num-stud-subject", getNumStudentsPerSubject);
 //router.post('/upload-image', uploadImage);
 
 export default router;

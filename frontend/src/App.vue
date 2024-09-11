@@ -38,6 +38,7 @@ body,
 #app {
   display: flex;
   min-width: 100%;
+  background-color: #f1f7ef;
 }
 
 .sidebar {

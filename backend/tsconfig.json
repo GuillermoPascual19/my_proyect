@@ -9,7 +9,6 @@
     "emitDecoratorMetadata": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["webpack-env"],
     "typeRoots": ["./typings/", "./node_modules/@types"],
     "isolatedModules": true
   },

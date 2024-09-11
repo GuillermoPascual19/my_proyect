@@ -53,7 +53,7 @@ const routes: Array<RouteRecordRaw> = [
     component: CambiarC,
   },
   {
-    path: "/changeCredentials",
+    path: "/settings",
     name: "changeCredentials",
     component: changeCredentials,
   },
