@@ -33,27 +33,22 @@
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label">Username: </label>
-            <label id="username" class="form-input"></label>
             <span class="valores"> {{ username }}</span>
           </div>
           <div class="form-group">
             <label class="form-label">Name: </label>
-            <label id="name" class="form-input"></label>
             <span class="valores"> {{ name }}</span>
           </div>
           <div class="form-group">
             <label class="form-label">Last Name: </label>
-            <label id="surname" class="form-input"></label>
             <span class="valores"> {{ surname }}</span>
           </div>
           <div class="form-group">
             <label class="form-label">Email: </label>
-            <label id="dirCorreo" class="form-input"></label>
             <span class="valores"> {{ dirCorreo }}</span>
           </div>
           <div class="form-group">
             <label class="form-label">Role: </label>
-            <label id="role" class="form-input"></label>
             <span class="valores"> {{ role }}</span>
           </div>
         </div>
@@ -86,16 +81,25 @@
                 ></v-text-field>
               </td>
             </tr>
+            <p>{{ JSON.stringify(fileRecords) }}</p>
           </template>
         </v-data-table-server>
       </div>
       <div class="fileSelector">
-        <input
+        <VueFileAgent
           type="file"
-          class="input-subject"
-          @change="onFileSelected"
-          accept="image/*"
+          v-model="fileRecords"
+          v-model:rawModelValue="rawFileRecords"
         />
+        <v-btn
+          class="text-none font-weight-regular"
+          prepend-icon="mdi-camara"
+          color="green"
+          variant="tonal"
+          @click="onFileSelected"
+        >
+          Subir Imagen
+        </v-btn>
       </div>
     </div>
   </div>
@@ -104,13 +108,13 @@
 <script>
 import userService from "../services/user/user.service";
 import authService from "../services/auth/auth.service";
-import FileAgent from "vue-file-agent";
-import "vue-file-agent/dist/vue-file-agent.css";
 
 export default {
   data: () => ({
     students: [],
-    selectedFile: null,
+    selectedFile: [],
+    fileRecords: [],
+    rawFileRecords: [],
     profilePictureUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
     userName: "",
     itemsPerPage: 5,
@@ -125,6 +129,7 @@ export default {
     search: {
       subject_name: "",
     },
+    file: null,
   }),
   methods: {
     getUserName() {
@@ -168,7 +173,6 @@ export default {
             subject_name: subject.subject_name,
             num_students: subject.num_students,
           }));
-          console.log("Students2:", this.students);
           this.serverItems = [...this.students];
           this.totalItems = this.students.length;
           this.loading = false;
@@ -189,7 +193,6 @@ export default {
       const end = start + itemsPerPage;
       let items = [...this.students];
 
-      console.log("Funciona", this.search);
       // Búsqueda
       if (search.name) {
         items = items.filter((student) =>
@@ -220,17 +223,33 @@ export default {
       this.loading = false;
     },
     async onFileSelected() {
-      if (!this.selectedFile || this.selectedFile.length === 0) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) {
+        console.log("go to login again");
+        this.$router.push("/login");
+      }
+      if (!this.fileRecords) {
         return;
       }
-
-      const formData = new FormData();
-      formData.append("image", this.selectedFile[0].file);
-      formData.append("access_token", "your_access_token_here");
-
+      let form_data = new FormData();
+      form_data.append(
+        "file",
+        this.fileRecords[0].file,
+        this.fileRecords[0].file.name
+      );
+      form_data.append("access_token", user.access_token);
       try {
-        const response = await userService.uploadImage(formData);
-        this.profilePictureUrl = response.data.imageUrl; // Assuming the server returns the URL of the uploaded image
+        console.log(
+          "[ProfileView-Teacher] Uploading profile picture...",
+          form_data.keys()
+        );
+        const response = await userService.uploadImage(form_data);
+        if (!response) {
+          console.error("Error uploading, no response:", response.data);
+          return;
+        }
+        this.profilePictureUrl = response.data.imageUrl;
+        console.log("Profile picture uploaded successfully:", response.data);
       } catch (error) {
         console.error("Error uploading profile picture:", error);
       }
@@ -253,9 +272,6 @@ export default {
   mounted() {
     this.getUserName();
     this.fetchStudents();
-  },
-  components: {
-    // VueFileAgent: FileAgent,
   },
 };
 </script>
@@ -373,6 +389,7 @@ export default {
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
   margin-top: 80px;
 }
+
 .btn-refresh {
   position: absolute;
   top: 20px;
@@ -383,5 +400,21 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fileSelector {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
+}
+
+.input-subject {
+  font-size: 14px;
 }
 </style>

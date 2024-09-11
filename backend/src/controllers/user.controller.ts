@@ -12,6 +12,7 @@ import path from "path";
 import Inspector from "inspector";
 import Roles from "../models/roles";
 import sequelize from "../config/database";
+import exp from "constants";
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -676,16 +677,25 @@ export const getNumStudentsPerSubject = async (req: Request, res: Response) => {
   }
 };
 //Subir imagen----------------------------------------------
-export const uploadImage = async (req: Request, res: Response) => {};
-// Configure multer for file storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../../uploads")); // Save in the 'uploads' directory
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
+export const uploadImage = async (req: Request, res: Response) => {
+  const { access_token, file } = req.body;
+  console.log("\n\n\n");
+  console.log("--------------------");
+  console.log(req.body);
+  console.log("--------------------");
+  console.log("\n\n\n");
+
+};
+// export const uploadImage = async (req: Request, res: Response) => {};
+// // Configure multer for file storage
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, path.join(__dirname, "../../uploads")); // Save in the 'uploads' directory
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, `${Date.now()}-${file.originalname}`);
+//   },
+// });
 // const upload = multer({ Storage: multer.diskStorage({});
 
 // export const uploadImage = async (req: Request, res: Response) => {

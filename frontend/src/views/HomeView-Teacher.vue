@@ -33,7 +33,6 @@
       </router-link>
     </div>
     <div class="botonesAsignaturas">
-      <!-- Dialog for Assign Subject -->
       <v-dialog v-model="assignDialog" max-width="600">
         <template v-slot:activator="{ props: activatorProps }">
           <v-btn

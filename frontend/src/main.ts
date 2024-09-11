@@ -8,6 +8,9 @@ import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import "@mdi/font/css/materialdesignicons.css"; // Ensure you are using css-loader
 import "./assets/tailwind.css"; // Import Tailwind CSS
+import VueFileAgentNext from "@boindil/vue-file-agent-next";
+
+import "@boindil/vue-file-agent-next/dist/vue-file-agent-next.css";
 
 // Create a Vuetify instance
 const vuetify = createVuetify({
@@ -18,4 +21,4 @@ const vuetify = createVuetify({
   },
 });
 
-createApp(App).use(router).use(vuetify).mount("#app");
+createApp(App).use(router).use(vuetify).use(VueFileAgentNext).mount("#app");
