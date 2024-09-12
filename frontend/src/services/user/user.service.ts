@@ -102,26 +102,14 @@ class UserService {
     }
     return api.post("/num-stud-subject", { id });
   }
-  // uploadImage(userData: { access_token: string; image: string }) {
-  //   const { access_token, image } = userData;
-  //   // Validate data
-  //   if (!image) {
-  //     throw new Error("Image is required");
-  //   } else if (!access_token) {
-  //     throw new Error("Access_Token is required");
-  //   }
-  //   return api.post("/upload-image", { access_token, image });
-  // }
-  uploadImage(userData: { access_token: string; file: File }) {
-    const { access_token, file } = userData;
+  uploadImage(userData: unknown) {
     console.log(userData);
-    // Validate data
-    if (!file) {
-      throw new Error("File is required");
-    } else if (!access_token) {
-      throw new Error("Access_Token is required");
-    }
-    return api.post("/upload-image", userData);
+
+    return api.post("/upload-image", userData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   }
 }
 export default new UserService();

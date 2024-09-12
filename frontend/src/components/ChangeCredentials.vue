@@ -78,14 +78,7 @@
         </div>
       </div>
     </form>
-    <div class="fileSelector">
-      <input
-        type="file"
-        class="input-subject"
-        @change="onFileSelected"
-        accept="image/*"
-      />
-    </div>
+    <p v-if="errorMessage.length > 0">{{ errorMessage }}</p>
   </div>
 </template>
 
@@ -113,6 +106,7 @@ export default {
     selectedFile: null,
     profilePictureUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
     userName: "",
+    errorMessage: "",
   }),
   //Components
   components: {
@@ -147,12 +141,9 @@ export default {
       }
     },
     async changeInfo() {
-      console.log(this.name);
-      console.log(this.surname);
-      console.log(this.email);
-      console.log(this.selected);
       if (!this.name || !this.surname || !this.email || !this.selected) {
         console.log("All fields are required");
+        this.errorMessage.value = "All fields are required";
         return;
       }
       //ValidateEmail
@@ -160,12 +151,15 @@ export default {
         /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       if (this.email.length < 8) {
         console.log("Email without enough length");
+        this.errorMessage.value = "Email without enough length";
         return;
       }
       if (!re.test(this.email)) {
         console.log(
           "Email incorrect! must contain at least one special character"
         );
+        this.errorMessage.value =
+          "Email incorrect! must contain at least one special character";
         return;
       }
       console.log("All fields are correct and validated correctly");
@@ -173,6 +167,7 @@ export default {
         const user = JSON.parse(localStorage.getItem("user"));
         if (!user) {
           console.log("User not found");
+          this.errorMessage.value = "User not found";
           return;
         }
         if (this.selected === "") {
@@ -214,6 +209,7 @@ export default {
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user) {
         console.log("User not found");
+        this.errorMessage.value = "User not found";
         this.$router.push("/login");
         return;
       }
@@ -230,6 +226,7 @@ export default {
         this.$router.push("/login");
       } catch (error) {
         console.error("Error al cerrar sesión:", error);
+        this.errorMessage = "Error al cerrar sesión";
       }
     },
   },

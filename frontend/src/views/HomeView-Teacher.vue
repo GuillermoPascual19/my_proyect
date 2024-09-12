@@ -348,7 +348,6 @@ export default {
             email: student.email,
             subjects: student.subjects,
           }));
-          console.log("Students2:", this.students);
           this.serverItems = [...this.students];
           this.totalItems = this.students.length;
           this.loading = false;
@@ -414,7 +413,6 @@ export default {
       const end = start + itemsPerPage;
       let items = [...this.students];
 
-      console.log("Funciona", this.search);
       // Búsqueda
       if (search.name) {
         items = items.filter((student) =>

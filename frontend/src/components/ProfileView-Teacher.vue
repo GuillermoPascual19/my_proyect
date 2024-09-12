@@ -142,8 +142,17 @@ export default {
           this.surname = user.surname + "";
           this.dirCorreo = user.email + "";
           this.role = user.role + "";
+          if (!user.image) {
+            this.profilePictureUrl =
+              "https://cdn.vuetifyjs.com/images/john.jpg";
+          } else {
+            //Set the image as the profile picture
+            //user.image = this.$route.query.token;
+            console.log("Profile picture URL: ", this.profilePictureUrl);
+          }
         } else {
           this.userName = "Usuario";
+          this.profilePictureUrl = "https://cdn.vuetifyjs.com/images/john.jpg";
         }
       } catch (error) {
         console.error("Error al obtener el nombre del usuario:", error);
@@ -239,10 +248,9 @@ export default {
       );
       form_data.append("access_token", user.access_token);
       try {
-        console.log(
-          "[ProfileView-Teacher] Uploading profile picture...",
-          form_data.keys()
-        );
+        form_data.forEach((value, key) => {
+          console.log(key, value);
+        });
         const response = await userService.uploadImage(form_data);
         if (!response) {
           console.error("Error uploading, no response:", response.data);

@@ -110,7 +110,7 @@ export class User extends Model<User, UserCreationAttributes> {
   active!: boolean;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.TEXT,
     allowNull: true,
   })
   image!: string;

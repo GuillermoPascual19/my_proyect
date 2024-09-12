@@ -9,7 +9,7 @@ import {
   getSubjectsByStudent,
   getStudents,
   closeSession,
-  uploadImage,
+  uploadImages,
   deleteUser,
   changeCrendentials,
   assignSubject,
@@ -17,7 +17,7 @@ import {
   getNumStudentsPerSubject,
 } from "../controllers/user.controller";
 
-import { verifyToken } from "../middleware/logger.middleware";
+import { verifyToken, upload } from "../middleware/logger.middleware";
 
 const router = Router();
 
@@ -31,7 +31,7 @@ router.post("/activate-account", activateAccount);
 router.post("/signin", loginUser);
 router.post("/change-password", changePassword);
 router.delete("/users/:id", deleteUser);
-router.post("/upload-image", uploadImage);
+router.post("/upload-image", [upload.single('file')], uploadImages);
 router.post("/closesession", [verifyToken], closeSession);
 router.post("/changeCredentials", [verifyToken], changeCrendentials);
 router.post("/assign-subject", assignSubject);

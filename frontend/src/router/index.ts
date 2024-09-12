@@ -48,7 +48,7 @@ const routes: Array<RouteRecordRaw> = [
     component: ActivarCuenta,
   },
   {
-    path: "/Change",
+    path: "/changePassword",
     name: "CambiarC",
     component: CambiarC,
   },

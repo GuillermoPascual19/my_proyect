@@ -13,6 +13,7 @@ import Inspector from "inspector";
 import Roles from "../models/roles";
 import sequelize from "../config/database";
 import exp from "constants";
+import bodyparser from "body-parser";
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -136,7 +137,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
       console.log("New user created:", newUser); // Log para verificar la inserción
       res
-        .status(201)
+        .status(200)
         .json({ message: "User registered successfully", user: newUser });
     } catch (error) {
       console.error("Error creating user:", error); // Log para capturar el error
@@ -640,14 +641,13 @@ export const getNumStudentsPerSubject = async (req: Request, res: Response) => {
   const { id } = req.body;
   console.log("Getting students for teacher:", id);
   try {
-
     const subjectsCount = await Students_teachers.findAll({
       where: { id_teacher: id },
       attributes: [
-        'id_subject',
-        [sequelize.fn('COUNT', sequelize.col('id_student')), 'num_students'],
+        "id_subject",
+        [sequelize.fn("COUNT", sequelize.col("id_student")), "num_students"],
       ],
-      group: ['id_subject', 'subjectStdTe.subject_name', 'subjectStdTe.id'], 
+      group: ["id_subject", "subjectStdTe.subject_name", "subjectStdTe.id"],
       include: [
         {
           model: Subject,
@@ -657,14 +657,14 @@ export const getNumStudentsPerSubject = async (req: Request, res: Response) => {
       ],
     });
 
-    if(!subjectsCount || subjectsCount.length === 0) {
+    if (!subjectsCount || subjectsCount.length === 0) {
       return res.status(404).send("No students found.");
     }
     const result = subjectsCount.map((entry) => ({
-      subject_name: entry.dataValues.subjectStdTe.dataValues.subject_name || "-",
+      subject_name:
+        entry.dataValues.subjectStdTe.dataValues.subject_name || "-",
       num_students: entry.dataValues.num_students,
-    })
-    );
+    }));
 
     if (!result || result.length === 0) {
       return res.status(404).send("No students found for the given teacher.");
@@ -677,57 +677,29 @@ export const getNumStudentsPerSubject = async (req: Request, res: Response) => {
   }
 };
 //Subir imagen----------------------------------------------
-export const uploadImage = async (req: Request, res: Response) => {
-  const { access_token, file } = req.body;
-  console.log("\n\n\n");
-  console.log("--------------------");
-  console.log(req.body);
-  console.log("--------------------");
-  console.log("\n\n\n");
+export const uploadImages = async (req: Request, res: Response) => {
+  const { access_token } = req.body;
+  const file = req.file;
+  if (!file) {
+    return res.status(400).send("Image is required");
+  }
 
+  try {
+    const user = await User.findOne({ where: { access_token } });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    user.image = `/uploads/${(file as Express.Multer.File).filename}`;
+
+    user.set({ image: `/uploads/${(file as Express.Multer.File).filename}` });
+
+    await user.save();
+
+    console.log("Image uploaded successfully");
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    return res.status(500).json({ message: "Server error", error });
+  }
 };
-// export const uploadImage = async (req: Request, res: Response) => {};
-// // Configure multer for file storage
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, path.join(__dirname, "../../uploads")); // Save in the 'uploads' directory
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, `${Date.now()}-${file.originalname}`);
-//   },
-// });
-// const upload = multer({ Storage: multer.diskStorage({});
-
-// export const uploadImage = async (req: Request, res: Response) => {
-//   const { access_token } = req.body;
-
-//   if (!access_token) {
-//     console.error("Access token is required");
-//     return res.status(400).send("Access token is required");
-//   }
-
-//   // Handle the file upload
-//   upload.single("image")(req, res, async (err) => {
-//     if (err) {
-//       console.error("Error uploading image:", err);
-//       return res.status(500).json({ message: "Server error", error: err });
-//     }
-
-//     try {
-//       const user = await User.findOne({ where: { access_token } });
-//       if (!user) {
-//         return res.status(404).send("User not found");
-//       }
-
-//       // Update the user's profile picture URL
-//       user.image = `/uploads/${(req.file as Express.Multer.File).filename}`;
-//       await user.save();
-
-//       console.log("Image uploaded successfully");
-//       res.status(200).json({ imageUrl: user.image });
-//     } catch (error) {
-//       console.error("Error uploading image:", error);
-//       return res.status(500).json({ message: "Server error", error });
-//     }
-//   });
-// };
