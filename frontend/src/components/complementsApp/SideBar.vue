@@ -20,10 +20,10 @@
         <v-icon>mdi-account-group</v-icon>
         <span class="text">TeamsChat</span>
       </router-link>
-      <router-link to="/contact" class="button">
+      <!-- <router-link to="/contact" class="button">
         <v-icon>mdi-image</v-icon>
         <span class="text">Images</span>
-      </router-link>
+      </router-link> -->
     </div>
 
     <div class="flex"></div>

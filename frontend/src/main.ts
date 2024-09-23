@@ -12,6 +12,7 @@ import VueFileAgentNext from "@boindil/vue-file-agent-next";
 
 import "@boindil/vue-file-agent-next/dist/vue-file-agent-next.css";
 
+import GoogleSignInPlugin from "vue3-google-signin";
 // Create a Vuetify instance
 const vuetify = createVuetify({
   components,
@@ -21,4 +22,13 @@ const vuetify = createVuetify({
   },
 });
 
-createApp(App).use(router).use(vuetify).use(VueFileAgentNext).mount("#app");
+createApp(App)
+  .use(router)
+  .use(vuetify)
+  .use(VueFileAgentNext)
+  .use(GoogleSignInPlugin, {
+    clientId:
+      process.env.GOOGLE_CLIENT_ID ||
+      "253371411273-gem7eg466pqbdnqd8fteam2qrmpql9mj.apps.googleusercontent.com",
+  })
+  .mount("#app");

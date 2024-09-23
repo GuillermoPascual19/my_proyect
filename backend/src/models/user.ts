@@ -114,6 +114,12 @@ export class User extends Model<User, UserCreationAttributes> {
     allowNull: true,
   })
   image!: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  id_google!: string;
 }
 
 export default User;

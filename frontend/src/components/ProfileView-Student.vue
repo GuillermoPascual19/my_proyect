@@ -1,4 +1,5 @@
 <template>
+  <SidebarComponent class="sidebar" />
   <div class="app">
     <div class="user-info">
       <span class="user-name">{{ userName }}</span>
@@ -6,13 +7,6 @@
         <v-img :src="profilePictureUrl"></v-img>
       </v-avatar>
     </div>
-
-    <!-- File Upload -->
-    <!-- <vue-file-agent
-        v-model="selectedFile"
-        @select="onFileSelected"
-        multiple
-      ></vue-file-agent> -->
     <div class="botones">
       <router-link to="/settings" class="button">
         <v-btn
@@ -59,10 +53,9 @@
   </div>
 </template>
 <script>
+import SidebarComponent from "../components/complementsApp/SideBar.vue";
 import userService from "../services/user/user.service";
 import authService from "../services/auth/auth.service";
-// import FileAgent from "vue-file-agent";
-// import "vue-file-agent/dist/vue-file-agent.css";
 
 export default {
   data: () => ({
@@ -75,6 +68,9 @@ export default {
     getUserName() {
       try {
         const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) {
+          this.$router.push("/login");
+        }
         if (user && user.name && user.surname) {
           this.userName = user.userName + " ";
           this.name = user.name + "";
@@ -86,7 +82,7 @@ export default {
         }
       } catch (error) {
         console.error("Error al obtener el nombre del usuario:", error);
-        this.userName = "Usuario"; // Nombre predeterminado en caso de error
+        this.userName = "Usuario";
       }
     },
     async fetchAsignaturas() {
@@ -109,29 +105,13 @@ export default {
     async changeCredentials() {
       this.$router.push("/settings");
     },
-    // async onFileSelected() {
-    //   if (!this.selectedFile || this.selectedFile.length === 0) {
-    //     return;
-    //   }
-
-    //   const formData = new FormData();
-    //   formData.append("image", this.selectedFile[0].file);
-    //   formData.append("access_token", "your_access_token_here");
-
-    //   try {
-    //     const response = await userService.uploadImage(formData);
-    //     this.profilePictureUrl = response.data.imageUrl; // Assuming the server returns the URL of the uploaded image
-    //   } catch (error) {
-    //     console.error("Error uploading profile picture:", error);
-    //   }
-    // },
   },
   mounted() {
     this.getUserName();
     this.fetchAsignaturas();
   },
   components: {
-    // VueFileAgent: FileAgent,
+    SidebarComponent,
   },
 };
 </script>
@@ -144,6 +124,9 @@ export default {
   background-color: #f1f7ef;
   margin: 0;
   padding-top: 100px;
+}
+.sidebar {
+  width: 11%;
 }
 .title {
   text-align: center;

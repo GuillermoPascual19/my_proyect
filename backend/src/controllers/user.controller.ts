@@ -23,15 +23,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const getAllUsers = async (req: Request, res: Response) => {
-  try {
-    const users = await User.findAll();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: "Something went wrong getting all users" });
-  }
-};
-
 const sendWelcomeEmail = async (user: User): Promise<void> => {
   if (!user.email) {
     console.error(
@@ -99,9 +90,11 @@ export const registerUser = async (req: Request, res: Response) => {
     try {
       // Verificar si el usuario ya existe
       const existingUser = await User.findOne({ where: { email } });
+      console.log(existingUser);
       const existingUsername = await User.findOne({ where: { username } });
+      console.log(existingUsername);
       if (existingUser != null || existingUsername != null) {
-        return res.status(402).json({ message: "User already exists" });
+        return res.status(404).json({ message: "User already exists" });
       }
 
       // Encriptar la contraseña
@@ -123,31 +116,30 @@ export const registerUser = async (req: Request, res: Response) => {
       if (role === 1) {
         const newStudent = await Students_teachers.create({
           id_student: newUser.id,
-          id_teacher: 0, // Provide the id_teacher value here
-          id_subject: 0, // Provide the id_subject value here
+          id_teacher: 0,
+          id_subject: 0,
         });
       } else if (role === 2) {
         const newTeacher = await Students_teachers.create({
-          id_student: 0, // Provide the id_student value here
+          id_student: 0,
           id_teacher: newUser.id,
-          id_subject: 0, // Provide the id_subject value here
+          id_subject: 0,
         });
       }
-      sendWelcomeEmail(newUser); // Envía un correo de bienvenida al usuario
+      sendWelcomeEmail(newUser);
 
-      console.log("New user created:", newUser); // Log para verificar la inserción
+      console.log("New user created:", newUser);
       res
         .status(200)
         .json({ message: "User registered successfully", user: newUser });
     } catch (error) {
-      console.error("Error creating user:", error); // Log para capturar el error
+      console.error("Error creating user:", error);
       res.status(550).json({ message: "CAFE Server error", error });
     }
   }
 };
 
 //Login de usuario----------------------------------------------
-
 export const loginUser = async (req: Request, res: Response) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -184,7 +176,6 @@ export const loginUser = async (req: Request, res: Response) => {
           if (user.active === false) {
             return res.status(404).send("User not activated");
           }
-
           // Generar el JWT
           const loginToken = jwt.sign(
             {
@@ -202,7 +193,6 @@ export const loginUser = async (req: Request, res: Response) => {
 
           return res
             .status(200)
-
             .send({ message: "User logged in successfully", loginToken, user });
         })
         .catch((error) => {
@@ -215,6 +205,39 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(500).json({ message: "CAFE Server error", error });
     });
 };
+//Login de usuario con Google----------------------------------------------
+export const loginGoogle = async (req: Request, res: Response) => {
+  const { idToken } = req.body;
+  if (!idToken) {
+    console.log("IdToken is required, login please");
+    return res.status(404).send("IdToken is required, login please"); 
+  }
+  try {
+    let user = await User.findOne({ where: { access_token: idToken } });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    
+    user = await user.save();
+    const loginToken = jwt.sign(
+      {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        surname: user.surname,
+        email: user.email,
+        role: user.role,
+      },
+      process.env.JWT_SECRET || "secret", 
+      { expiresIn: "1h" }
+    );
+    console.log("User logged in successfully");
+    res.status(200).send({ loginToken, user });
+  } catch (error) {
+    console.error("Error logging in, can´t find this user:", error); // Log para capturar el error
+    return res.status(500).json({ message: "CAFE Server error", error });
+  } 
+};
 
 //Activar cuenta de usuario----------------------------------------------
 
@@ -226,15 +249,15 @@ export const activateAccount = async (req: Request, res: Response) => {
     return res.status(400).send("Access token is required");
   }
 
-  const user = await User.findOne({ where: { access_token } });
+  let user = await User.findOne({ where: { access_token } });
 
   if (!user) {
     console.log("User not found"); // Log para verificar el error
     return res.status(404).send("User not found");
   }
 
-  user.active = true;
-  await user.save();
+  user.set({ active : true });
+  user = await user.save();
 
   console.log("Account activated successfully"); // Log para verificar
   res.status(200).json(user);
@@ -298,7 +321,7 @@ export const changePassword = async (req: Request, res: Response) => {
   }
 
   try {
-    const user = await User.findOne({ where: { password_token } });
+    let user = await User.findOne({ where: { password_token } });
     if (!user) {
       console.log("User not found. Access token isnt found"); // Log para verificar el error
       return res.status(403).send("User not found. Access token isnt found");
@@ -308,7 +331,8 @@ export const changePassword = async (req: Request, res: Response) => {
     const token = utils.generateToken(32);
     user.password_token = token;
     user.password = hashedPassword;
-    await user.save();
+    user.set({ password: hashedPassword, password_token: token });
+    user = await user.save();
 
     console.log(
       "Password changed and new password_token generated successfully"
@@ -494,16 +518,13 @@ export const changeCrendentials = async (req: Request, res: Response) => {
   }
 
   try {
-    const user = await User.findOne({ where: { id } });
+    let user = await User.findOne({ where: { id } });
     if (!user) {
       return res.status(404).send("User not found");
     }
 
-    user.role = rol;
-    user.email = email;
-    user.name = name;
-    user.surname = surname;
-    await user.save();
+    user.set({ role: rol, email, name, surname });
+    user = await user.save();
 
     try {
       // Generar el JWT
@@ -685,7 +706,7 @@ export const uploadImages = async (req: Request, res: Response) => {
   }
 
   try {
-    const user = await User.findOne({ where: { access_token } });
+    let user = await User.findOne({ where: { access_token } });
     if (!user) {
       return res.status(404).send("User not found");
     }
@@ -694,7 +715,7 @@ export const uploadImages = async (req: Request, res: Response) => {
 
     user.set({ image: `/uploads/${(file as Express.Multer.File).filename}` });
 
-    await user.save();
+    user = await user.save();
 
     console.log("Image uploaded successfully");
     res.status(200).json(user);

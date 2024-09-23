@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <SidebarComponent class="sidebar" />
     <div class="content">
       <nav>
         <router-link to="/login">Login</router-link> |
@@ -16,16 +15,7 @@
     </div>
   </div>
 </template>
-<script>
-import SidebarComponent from "./components/complementsApp/SideBar.vue";
 
-export default {
-  name: "App",
-  components: {
-    SidebarComponent,
-  },
-};
-</script>
 <style lang="scss" scoped>
 html,
 body,
@@ -37,19 +27,16 @@ body,
 
 #app {
   display: flex;
+  flex-direction: column;
   min-width: 100%;
   background-color: #f1f7ef;
-}
-
-.sidebar {
-  width: 11%;
 }
 
 .content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  // justify-content: space-between;
 }
 
 nav {

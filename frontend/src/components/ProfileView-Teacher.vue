@@ -1,4 +1,5 @@
 <template>
+  <SidebarComponent class="sidebar" />
   <div class="app">
     <div class="user-info">
       <v-avatar class="avatar" size="80" color="grey">
@@ -106,6 +107,7 @@
 </template>
 
 <script>
+import SidebarComponent from "../components/complementsApp/SideBar.vue";
 import userService from "../services/user/user.service";
 import authService from "../services/auth/auth.service";
 
@@ -135,6 +137,9 @@ export default {
     getUserName() {
       try {
         const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) {
+          this.$router.push("/login");
+        }
         if (user) {
           this.username = user.username + " ";
           this.userName = user.name + " " + user.surname;
@@ -150,9 +155,6 @@ export default {
             //user.image = this.$route.query.token;
             console.log("Profile picture URL: ", this.profilePictureUrl);
           }
-        } else {
-          this.userName = "Usuario";
-          this.profilePictureUrl = "https://cdn.vuetifyjs.com/images/john.jpg";
         }
       } catch (error) {
         console.error("Error al obtener el nombre del usuario:", error);
@@ -281,6 +283,9 @@ export default {
     this.getUserName();
     this.fetchStudents();
   },
+  components: {
+    SidebarComponent,
+  },
 };
 </script>
 
@@ -294,7 +299,9 @@ export default {
   padding-top: 100px;
   position: relative;
 }
-
+.sidebar {
+  width: 11%;
+}
 .user-info {
   display: flex;
   align-items: center;

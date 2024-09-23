@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@boindil/vue-file-agent-next": "^1.0.5",
+    "@types/gapi.auth2": "^0.0.60",
     "axios": "^1.7.7",
     "core-js": "^3.8.3",
     "cors": "^2.8.5",
@@ -24,6 +25,7 @@
     "vue-class-component": "^8.0.0-0",
     "vue-google-signin-button": "^1.0.4",
     "vue-router": "^4.4.0",
+    "vue3-google-signin": "^2.0.0",
     "vuetify": "^3.7.0",
     "yup": "^1.4.0"
   },

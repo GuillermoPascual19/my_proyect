@@ -22,6 +22,15 @@
           placeholder="Password"
         />
         <input class="form-submit" type="submit" value="Sign In" />
+        <p class="error" v-if="error">{{ errorMesage }}</p>
+        <div class="signinG">
+          <button @click="loginGoogle" class="button google">
+            <v-icon left>mdi-google</v-icon> Sign in with Google
+          </button>
+          <!-- <a class="button google" href="localhost:3000/api/google">
+            Sign in with Google</a
+          > -->
+        </div>
       </form>
     </div>
     <div class="mensajes">
@@ -46,34 +55,50 @@ export default {
     username: "",
     password: "",
     error: false,
+    errorMesage: "",
   }),
   methods: {
     async login() {
       if (!this.username || !this.password) {
         console.log("Username and password are required");
         console.error("Username and password are required");
+        this.error = true;
+        this.errorMesage = "Username and password are required";
         return;
       }
       //ValidatePassword
       if (this.password.length < 8) {
         console.log("Password must be at least 8 characters long");
         console.error("Password must be at least 8 characters long");
+        this.error = true;
+        this.errorMesage = "Password must be at least 8 characters long";
         return;
       } else if (!/[A-Z]/.test(this.password)) {
         console.log("Password must contain at least one uppercase letter");
         console.error("Password must contain at least one uppercase letter");
+        this.error = true;
+        this.errorMesage =
+          "Password must contain at least one uppercase letter";
         return;
       } else if (!/[a-z]/.test(this.password)) {
         console.log("Password must contain at least one lowercase letter");
         console.error("Password must contain at least one lowercase letter");
+        this.error = true;
+        this.errorMesage =
+          "Password must contain at least one lowercase letter";
         return;
       } else if (!/[0-9]/.test(this.password)) {
         console.log("Password must contain at least one number");
         console.error("Password must contain at least one number");
+        this.error = true;
+        this.errorMesage = "Password must contain at least one number";
         return;
       } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(this.password)) {
         console.log("Password must contain at least one special character");
         console.error("Password must contain at least one special character");
+        this.error = true;
+        this.errorMesage =
+          "Password must contain at least one special character";
         return;
       }
       //Funcionality
@@ -88,13 +113,29 @@ export default {
         console.log("--------------------");
         localStorage.setItem("user", JSON.stringify(user));
         if (user.role == "1") {
-          this.$router.push("/student?token=" + user.access_token);
+          this.$router.push(
+            "/student?token=" + user.access_token + "&typelogin=manual"
+          );
         } else if (user.role == "2") {
-          this.$router.push("/teacher?token=" + user.access_token);
+          this.$router.push(
+            "/teacher?token=" + user.access_token + "&typelogin=manual"
+          );
         }
       } catch (error) {
         console.log(error);
         this.error = true;
+      }
+    },
+    async loginGoogle() {
+      try {
+        window.location.href = "http://localhost:3000/api/google";
+        //localStorage.setItem("user", JSON.stringify(user));
+        // const response = await AuthService.loginGoogle();
+        // console.log(response);
+      } catch (error) {
+        console.error(error);
+        this.error = true;
+        this.errorMesage = "Error in Google Sign In";
       }
     },
   },
@@ -184,10 +225,58 @@ export default {
 }
 .mensajes {
   flex-direction: column;
-  align-items: center; /* Center the content horizontally */
-  justify-content: center; /* Center the content vertically */
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  margin-top: 2rem; /* Adjust this value as needed for spacing */
+  margin-top: 2rem;
   padding: 1rem;
+}
+.signinG {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  padding: 1rem 0;
+  width: 100%;
+  height: 100%;
+  padding: 1rem 0;
+  cursor: pointer;
+}
+
+.button.google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  background-color: #4285f4; /* Azul Google */
+  border: none;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #357ae8; /* Azul Google más oscuro para el hover */
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.5); /* Enfocado */
+  }
+
+  &:active {
+    background-color: #3367d6; /* Azul Google aún más oscuro */
+  }
+
+  img {
+    margin-right: 0.5rem;
+    width: 20px;
+    height: 20px;
+  }
 }
 </style>

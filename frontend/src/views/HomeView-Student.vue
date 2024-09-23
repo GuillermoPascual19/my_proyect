@@ -1,4 +1,5 @@
 <template>
+  <SidebarComponent class="sidebar" />
   <div class="app">
     <div class="user-info">
       <span class="user-name">{{ userName }}</span>
@@ -57,6 +58,7 @@
 </template>
 
 <script>
+import SidebarComponent from "../components/complementsApp/SideBar.vue";
 import userService from "../services/user/user.service";
 import authService from "../services/auth/auth.service";
 
@@ -71,31 +73,96 @@ export default {
   }),
   methods: {
     gotoProfile() {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user) {
-        console.log("No user, please login");
-        console.error("No user, please login");
-        this.router.push("/login");
-      } else {
+      if (this.flagLogged === true) {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) {
+          console.log("User not found, go to login");
+          console.error("User not found, go to login");
+          this.$router.push("/login");
+        }
         if (user.role === 1) {
-          this.router.push("/profileSt?token=" + user.access_token);
+          this.$router.push("/profileSt?token=" + user.access_token);
         } else {
-          this.router.push("/profileTe?token=" + user.access_token);
+          this.$router.push("/profileTe?token=" + user.access_token);
         }
       }
     },
     getUserName() {
-      try {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (user && user.name && user.surname) {
-          this.userName = user.name + " " + user.surname;
-          this.user_id = user.id;
-        } else {
+      if (this.flagLogged === true) {
+        return;
+      } else {
+        try {
+          const typelogin = this.$route.query.typelogin;
+          if (typelogin === "google") {
+            this.getUserFromGoogle();
+            return;
+          } else {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (!user) {
+              console.log("User not found, go to login 2");
+              console.error("User not found, go to login");
+              this.$router.push("/login");
+            }
+            if (user && user.name && user.surname) {
+              this.userName = user.name + " " + user.surname;
+              this.flagLogged = true;
+            }
+          }
+        } catch (error) {
+          console.error("Error al obtener el nombre del usuario:", error);
           this.userName = "Usuario";
         }
-      } catch (error) {
-        console.error("Error al obtener el nombre del usuario:", error);
-        this.userName = "Usuario";
+      }
+    },
+    async getUserFromGoogle() {
+      if (this.flagLogged === true) {
+        return;
+      } else {
+        try {
+          const typelogin = this.$route.query.typelogin;
+          if (typelogin === "manual") {
+            this.getUserName();
+            return;
+          } else {
+            if (!localStorage.getItem("user")) {
+              const token = this.$route.query.token;
+              if (!token) {
+                console.error("No token provided, go to login");
+                this.$router.push("/login");
+                return;
+              }
+              console.log("Token provided, getting user from Google: ", token);
+              const data = await authService.loginGoogle({ idToken: token });
+              const user = data.user;
+              if (!user) {
+                console.log("User not found, go to login 1");
+                console.error("User not found, go to login");
+                this.$router.push("/login");
+              } else {
+                console.log("User:", user.name);
+                console.log("User logged and saved in localStorage");
+                localStorage.setItem("user", JSON.stringify(user));
+                this.userName = user.name + " " + user.surname;
+                if (user.image) {
+                  this.profilePictureUrl = user.image;
+                }
+                this.flagLogged = true;
+              }
+            } else {
+              const user = JSON.parse(localStorage.getItem("user"));
+              this.userName = user.name + " " + user.surname;
+              if (user.image) {
+                this.profilePictureUrl = user.image;
+              }
+              console.log("User already logged in and in localStorage");
+              this.flagLogged = true;
+              return;
+            }
+          }
+        } catch (error) {
+          console.error("Error al obtener los datos del usuario:", error);
+          this.$router.push("/login");
+        }
       }
     },
     async cerrarSesion() {
@@ -103,46 +170,55 @@ export default {
         await authService.logout();
         localStorage.removeItem("user");
         this.$router.push("/login");
+        this.flagLogged = false;
       } catch (error) {
         console.error("Error al cerrar sesión:", error);
       }
     },
     async fetchSubjects() {
-      const user = JSON.parse(localStorage.getItem("user"));
-      console.log("Fetching subjects for student...", user.id);
-      this.loading = false;
-      try {
-        const response = await userService.getSubjectsByStudent(user.id);
+      if (this.flagLogged === true) {
+        const user = JSON.parse(localStorage.getItem("user"));
+        console.log("Fetching subjects for student...", user.id);
+        this.loading = false;
+        try {
+          const response = await userService.getSubjectsByStudent(user.id);
 
-        if (
-          !response.data ||
-          response.data.length === 0 ||
-          response.data === ""
-        ) {
-          this.profesors.email = "-";
-          this.profesors.name = "-";
-          this.profesors.surname = "-";
-          this.profesors.subjects = "-";
-          console.log("No data received");
+          if (
+            !response.data ||
+            response.data.length === 0 ||
+            response.data === ""
+          ) {
+            this.profesors.email = "-";
+            this.profesors.name = "-";
+            this.profesors.surname = "-";
+            this.profesors.subjects = "-";
+            console.log("No data received");
+          }
+          this.profesors.name = response.data.name;
+          this.profesors.surname = response.data.surname;
+          this.profesors.email = response.data.email;
+          this.profesors.name_subject = response.data.name_subject;
+          this.profesors = response.data;
+          console.log("Formatted students:", this.profesors);
+        } catch (error) {
+          console.error("Error fetching subjects:", error);
         }
-        this.profesors.name = response.data.name;
-        this.profesors.surname = response.data.surname;
-        this.profesors.email = response.data.email;
-        this.profesors.name_subject = response.data.name_subject;
-        this.profesors = response.data;
-        console.log("Formatted students:", this.profesors);
-      } catch (error) {
-        console.error("Error fetching subjects:", error);
       }
     },
     async changeCredentials() {
-      const user = JSON.parse(localStorage.getItem("user"));
-      this.$router.push("/settings?token=" + user.access_token);
+      if (this.flagLogged === true) {
+        const user = JSON.parse(localStorage.getItem("user"));
+        this.$router.push("/settings?token=" + user.access_token);
+      }
     },
   },
   mounted() {
     this.getUserName();
+    this.getUserFromGoogle();
     this.fetchSubjects();
+  },
+  components: {
+    SidebarComponent,
   },
 };
 </script>

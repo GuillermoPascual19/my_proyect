@@ -1,4 +1,5 @@
 <template>
+  <SidebarComponent class="sidebar" />
   <div class="app">
     <div class="user-info">
       <span class="user-name">{{ userName }}</span>
@@ -83,6 +84,7 @@
 </template>
 
 <script>
+import SidebarComponent from "../components/complementsApp/SideBar.vue";
 import { FwbSelect } from "flowbite-vue";
 import userService from "../services/user/user.service";
 import authService from "../services/auth/auth.service";
@@ -111,20 +113,24 @@ export default {
   //Components
   components: {
     FwbSelect,
+    SidebarComponent,
   },
   //Methods
   methods: {
     getUserName() {
       try {
         const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) {
+          console.log("User not found, go to login");
+          console.error("User not found, go to login");
+          this.$router.push("/login");
+        }
         if (user && user.name && user.surname) {
           this.userName = user.name + " " + user.surname;
-        } else {
-          this.userName = "Usuario";
         }
       } catch (error) {
         console.error("Error al obtener el nombre del usuario:", error);
-        this.userName = "Usuario"; // Nombre predeterminado en caso de error
+        this.userName = "Usuario";
       }
     },
     gotoProfile() {
@@ -241,10 +247,10 @@ export default {
 <style lang="scss" scoped>
 .app {
   display: flex;
-  flex-direction: column; /* Asegura que los elementos se organicen en columna */
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Mantiene los elementos alineados al inicio de la columna */
-  min-height: 90vh;
+  justify-content: flex-start;
+  min-height: 100vh;
   background-color: #f8f9fa;
   margin: 0;
   padding-top: 100px;
@@ -255,24 +261,12 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 40%;
-  min-width: 700px;
-  max-width: 100%;
+  width: 80%;
+  max-width: 700px;
   background: rgba(19, 35, 47, 0.9);
   border-radius: 5px;
   padding: 40px;
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
-}
-
-.fileSelector {
-  margin-top: 20px; /* Asegura que haya espacio entre el formulario y este contenedor */
-  width: 40%;
-  min-width: 700px;
-  max-width: 100%;
-  background: #ffffff; /* Opcional: un fondo diferente */
-  border-radius: 5px;
-  padding: 20px;
-  box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.1);
 }
 
 .title {
@@ -281,41 +275,42 @@ export default {
   font-size: 50px;
   font-weight: 800;
 }
+
 .user-info {
   position: absolute;
-  top: 70px; /* Ajusta según el tamaño del navbar */
-  right: 40px;
+  top: 20px;
+  right: 20px;
   display: flex;
   align-items: center;
 }
 
 .user-name {
-  margin-right: 10px; /* Espacio entre el nombre y el avatar */
+  margin-right: 10px;
   font-size: 18px;
   font-weight: bold;
-  color: #333; /* Color del texto del nombre del usuario */
+  color: #333;
 }
 
 .avatar {
   margin-left: 10px;
 }
+
 .botones {
   position: absolute;
-  top: 160px; /* Coloca los botones debajo del avatar */
-  right: 40px;
+  top: 120px;
+  right: 20px;
   display: flex;
-  flex-direction: column; /* Organiza los botones en columna */
-  justify-content: flex-start; /* Alinea los botones al inicio de la columna */
+  flex-direction: column;
   align-items: center;
   margin-top: 20px;
 }
 
 .button {
   display: flex;
-  flex-direction: column; /* Alinea el icono y el texto en columna */
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 10px; /* Espacio entre los botones */
-  text-decoration: none; /* Elimina el subrayado de los enlaces */
+  margin-bottom: 10px;
+  text-decoration: none;
 }
 
 .form-grid {
@@ -343,11 +338,11 @@ export default {
 .form-select {
   padding: 10px 15px;
   margin-bottom: 1rem;
-  background: none;
-  border: none; /* Cambia esto para el borde blanco */
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #ccc;
   color: white;
-  border-radius: 5px; /* Opcional: añadir bordes redondeados */
-  box-shadow: 0 4px 10px 4px rgba(19, 35, 47, 0.9);
+  border-radius: 5px;
+  box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
 }
 
 .form-input:focus,

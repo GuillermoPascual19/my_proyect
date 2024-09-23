@@ -66,9 +66,21 @@ class AuthService {
       role,
     });
   }
+  loginGoogle(userData: { idToken: string }) {
+    const { idToken } = userData;
+    // Validate data
+    if (!idToken) {
+      throw new Error("IdToken is required");
+    }
+    return api.post("/loginGoogle", { idToken }).then((response) => {
+      console.log("authService.loginGoogle:", response);
+      return response.data;
+    });
+  }
 
   cerrarSesion() {
-    return api.get("/signout");
+    console.log("AuthService.cerrarSesion hasta aquí esta bien");
+    return api.get("/logout");
   }
 }
 

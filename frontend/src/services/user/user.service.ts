@@ -2,7 +2,7 @@ import api from "..";
 
 class UserService {
   getStudents() {
-    return api.post("/teachers");
+    return api.get("/teachers");
   }
   getSubjectsByStudent(id: number) {
     // Validate data
@@ -63,7 +63,7 @@ class UserService {
     } else if (!name) {
       throw new Error("Name is required");
     }
-    return api.post("/change-credentials", { name, surname, email, role, id });
+    return api.post("/changeCredentials", { name, surname, email, role, id });
   }
   assignSubject(userData: { id: number; email: string; subject: string }) {
     const { id, email, subject } = userData;
