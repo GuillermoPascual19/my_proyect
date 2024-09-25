@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import UserService from "@/services/user/user.service.ts";
+import UserService from "@/services/user.service.ts";
 
 export default {
   data() {

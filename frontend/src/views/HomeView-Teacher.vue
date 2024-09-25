@@ -22,9 +22,9 @@
           class="ma-2"
           color="purple"
           icon="mdi-exit-to-app"
-          @click="cerrarSesion"
+          @click="logOut"
         ></v-btn>
-        <span class="text">Close Session</span>
+        <span class="text">Log out</span>
       </router-link>
     </div>
     <div class="botonesAsignaturas">
@@ -187,8 +187,8 @@
 
 <script>
 import SidebarComponent from "../components/complementsApp/SideBar.vue";
-import userService from "../services/user/user.service";
-import authService from "../services/auth/auth.service";
+import userService from "../services/user.service";
+import authService from "../services/auth.service";
 
 export default {
   name: "App",
@@ -282,7 +282,7 @@ export default {
               }
               console.log("Token provided, getting user from Google: ", token);
               const data = await authService.loginGoogle({ idToken: token });
-              const user = data.user;
+              const user = data.infoUser;
               if (!user) {
                 console.log("User not found, go to login 1");
                 console.error("User not found, go to login");
@@ -426,11 +426,13 @@ export default {
         }
       }
     },
-    async cerrarSesion() {
+    async logOut() {
       try {
-        await authService.cerrarSesion();
+        const infoUser = JSON.parse(localStorage.getItem("user"));
+        console.log("Cerrando sesión para el usuario con id:", infoUser.id);
+        const access_token = infoUser.access_token;
+        await authService.logOut({ access_token });
         localStorage.removeItem("user");
-        localStorage.clear();
         this.$router.push("/login");
         this.flagLogged = false;
       } catch (error) {
@@ -672,6 +674,7 @@ h1 {
   padding: 40px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   margin: 80px auto 20px auto;
+  margin-top: 40px;
   position: relative;
 }
 

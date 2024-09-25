@@ -16,6 +16,14 @@ export const verifyToken = (req: Request, res: Response, next: Function) => {
       process.env.JWT_SECRET || "secret"
     );
     req.user = decoded as decodedToken; // Guardamos los datos del usuario decodificados en req.user
+    
+    // Buscar usuario
+
+    // Si existe --> req.user = usuario
+
+    // Si no existe --> return res.status(401).send("User not found");
+    
+    // Si esta banneado --> 403
     next();
   } catch (error) {
     return res.status(401).send("Invalid Token");

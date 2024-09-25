@@ -1,4 +1,4 @@
-import api from "..";
+import api from ".";
 
 class UserService {
   getStudents() {
@@ -36,14 +36,6 @@ class UserService {
       throw new Error("Access_Token is required");
     }
     return api.post("/change-password", { access_token, password });
-  }
-  deleteUser(userData: { id: string }) {
-    const { id } = userData;
-    // Validate data
-    if (!id) {
-      throw new Error("Id is required");
-    }
-    return api.delete(`/users/${id}`);
   }
   changeCredentials(userData: {
     name: string;

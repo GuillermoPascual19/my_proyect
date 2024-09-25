@@ -22,7 +22,7 @@
           class="ma-2"
           color="purple"
           icon="mdi-exit-to-app"
-          @click="cerrarSesion"
+          @click="logOut"
         ></v-btn>
         <span class="text">Close Session</span>
       </router-link>
@@ -54,8 +54,8 @@
 </template>
 <script>
 import SidebarComponent from "../components/complementsApp/SideBar.vue";
-import userService from "../services/user/user.service";
-import authService from "../services/auth/auth.service";
+import userService from "../services/user.service";
+import authService from "../services/auth.service";
 
 export default {
   data: () => ({
@@ -93,9 +93,9 @@ export default {
         console.error("Error al obtener las asignaturas:", error);
       }
     },
-    async cerrarSesion() {
+    async logOut() {
       try {
-        await authService.logout();
+        await authService.logOut();
         localStorage.removeItem("user");
         this.$router.push("/login");
       } catch (error) {

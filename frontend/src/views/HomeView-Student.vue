@@ -28,7 +28,7 @@
           class="ma-2"
           color="purple"
           icon="mdi-exit-to-app"
-          @click="cerrarSesion"
+          @click="logOut"
         ></v-btn>
         <span class="text">Close Session</span>
       </router-link>
@@ -59,8 +59,8 @@
 
 <script>
 import SidebarComponent from "../components/complementsApp/SideBar.vue";
-import userService from "../services/user/user.service";
-import authService from "../services/auth/auth.service";
+import userService from "../services/user.service";
+import authService from "../services/auth.service";
 
 export default {
   data: () => ({
@@ -134,6 +134,7 @@ export default {
               console.log("Token provided, getting user from Google: ", token);
               const data = await authService.loginGoogle({ idToken: token });
               const user = data.user;
+              const loginUser = data.loginToken;
               if (!user) {
                 console.log("User not found, go to login 1");
                 console.error("User not found, go to login");
@@ -141,7 +142,7 @@ export default {
               } else {
                 console.log("User:", user.name);
                 console.log("User logged and saved in localStorage");
-                localStorage.setItem("user", JSON.stringify(user));
+                localStorage.setItem("user", JSON.stringify(loginUser));
                 this.userName = user.name + " " + user.surname;
                 if (user.image) {
                   this.profilePictureUrl = user.image;
@@ -165,9 +166,9 @@ export default {
         }
       }
     },
-    async cerrarSesion() {
+    async logOut() {
       try {
-        await authService.logout();
+        await authService.logOut();
         localStorage.removeItem("user");
         this.$router.push("/login");
         this.flagLogged = false;

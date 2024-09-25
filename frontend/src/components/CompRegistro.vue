@@ -103,7 +103,7 @@
 <script>
 import { FwbSelect } from "flowbite-vue";
 //import { ref } from "vue";
-import authService from "../services/auth/auth.service";
+import authService from "../services/auth.service";
 
 export default {
   name: "ComponenteRegistro",

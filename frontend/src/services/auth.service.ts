@@ -1,14 +1,14 @@
-import api from "..";
+import api from ".";
 
 class AuthService {
-  login(userData: { username: string; password: string }) {
-    const { username, password } = userData;
+  login(userData: { email: string; password: string }) {
+    const { email, password } = userData;
     // Validate data
-    if (!username || !password) {
+    if (!email || !password) {
       throw new Error("All fields are required");
     }
     return api
-      .post("/signin", { username, password })
+      .post("/signin", { email, password })
       .then((response) => {
         if (response.status !== 200) {
           throw new Error("Login failed");
@@ -78,9 +78,14 @@ class AuthService {
     });
   }
 
-  cerrarSesion() {
+  logOut(userData: { access_token: string }) {
+    const { access_token } = userData;
+    // Validate data
+    if (!access_token) {
+      throw new Error("AuthService.Access_token is required");
+    }
     console.log("AuthService.cerrarSesion hasta aquí esta bien");
-    return api.get("/logout");
+    return api.post("/closeSession", { access_token });
   }
 }
 

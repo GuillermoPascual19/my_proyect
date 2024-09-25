@@ -14,6 +14,7 @@ import Roles from "../models/roles";
 import sequelize from "../config/database";
 import exp from "constants";
 import bodyparser from "body-parser";
+import { access } from "fs";
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -113,25 +114,30 @@ export const registerUser = async (req: Request, res: Response) => {
         active: false,
         image: "",
       });
-      if (role === 1) {
-        const newStudent = await Students_teachers.create({
-          id_student: newUser.id,
-          id_teacher: 0,
-          id_subject: 0,
-        });
-      } else if (role === 2) {
-        const newTeacher = await Students_teachers.create({
-          id_student: 0,
-          id_teacher: newUser.id,
-          id_subject: 0,
-        });
-      }
+      const loginToken = jwt.sign(
+        {
+          id: newUser.id,
+          role: newUser.role,
+        },
+        process.env.JWT_SECRET || "secret", 
+        { expiresIn: "1h" }
+      );
+      const infoUser = {
+        id: newUser.id,
+        name: newUser.name,
+        surname: newUser.surname,
+        username: newUser.username,
+        email: newUser.email,
+        image: newUser.image,
+        role: newUser.role,
+        access_token: loginToken,
+      };
       sendWelcomeEmail(newUser);
 
       console.log("New user created:", newUser);
       res
         .status(200)
-        .json({ message: "User registered successfully", user: newUser });
+        .json({ message: "User registered successfully", user: infoUser });
     } catch (error) {
       console.error("Error creating user:", error);
       res.status(550).json({ message: "CAFE Server error", error });
@@ -141,12 +147,12 @@ export const registerUser = async (req: Request, res: Response) => {
 
 //Login de usuario----------------------------------------------
 export const loginUser = async (req: Request, res: Response) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
+  const { email, password } = req.body;
+  if (!email || !password) {
     return res.status(400).send("Username and password are required");
   }
 
-  await User.findOne({ where: { username } })
+  await User.findOne({ where: { email } })
     .then(async (user) => {
       if (!user) {
         return res.status(404).send("User not found");
@@ -180,20 +186,27 @@ export const loginUser = async (req: Request, res: Response) => {
           const loginToken = jwt.sign(
             {
               id: user.id,
-              username: user.username,
-              name: user.name,
-              surname: user.surname,
-              email: user.email,
               role: user.role,
             },
-            process.env.JWT_SECRET || "secret", // Asegúrate de usar una clave secreta segura
+            process.env.JWT_SECRET || "secret", 
             { expiresIn: "1h" }
           );
           console.log("User logged in successfully");
 
+          const infoUser = {
+            id: user.id,
+            name: user.name,
+            surname: user.surname,
+            email: user.email,
+            image: user.image,
+            role: user.role,
+            access_token: loginToken,
+          };
+          
+          user.access_token = loginToken;
           return res
             .status(200)
-            .send({ message: "User logged in successfully", loginToken, user });
+            .send({ message: "User logged in successfully", loginToken, infoUser });
         })
         .catch((error) => {
           console.error("Error comparing passwords:", error); // Log para capturar el error
@@ -219,20 +232,30 @@ export const loginGoogle = async (req: Request, res: Response) => {
     }
     
     user = await user.save();
+    
     const loginToken = jwt.sign(
       {
         id: user.id,
-        username: user.username,
-        name: user.name,
-        surname: user.surname,
-        email: user.email,
         role: user.role,
       },
       process.env.JWT_SECRET || "secret", 
       { expiresIn: "1h" }
     );
+    user.access_token = loginToken;
+    user = await user.save();
+    const infoUser = {
+      id: user.id,
+      name: user.name,
+      surname: user.surname,
+      email: user.email,
+      image: user.image,
+      role: user.role,
+      access_token: user.access_token,
+    };
+    
+    
     console.log("User logged in successfully");
-    res.status(200).send({ loginToken, user });
+    res.status(200).send({ loginToken, infoUser });
   } catch (error) {
     console.error("Error logging in, can´t find this user:", error); // Log para capturar el error
     return res.status(500).json({ message: "CAFE Server error", error });
@@ -364,29 +387,6 @@ export const changePassword = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
-  const { id } = req.body;
-
-  if (!id) {
-    return res.status(400).send("User ID is required");
-  }
-
-  try {
-    const user = await User.findOne({ where: { id } });
-
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    await user.destroy();
-    console.log(`User with ID ${id} deleted successfully`); // Log para verificar la eliminación
-    res.status(200).send(`User with ID ${id} deleted successfully`);
-  } catch (error) {
-    console.error("Error deleting user:", error); // Log para capturar el error
-    res.status(550).json({ message: "CAFE Server error", error });
-  }
-};
-
 //Obtener asignaturas y su respectivo profesor por estudiante----------------------------------------------
 export const getSubjectsByStudent = async (req: Request, res: Response) => {
   const { id } = req.body;
@@ -495,10 +495,21 @@ export const getStudents = async (req: Request, res: Response) => {
 };
 //Cerrar sesión----------------------------------------------
 export const closeSession = async (req: Request, res: Response) => {
-  const id = req.user.id;
+  const { access_token } = req.body;
 
+  if (!access_token) {
+    return res.status(404).send("UserId is required");
+  }
   try {
-    const user = await Session.destroy({ where: { id_user: id } });
+    const user = await User.findOne({ where: { access_token } });
+    if(!user){
+      return res.status(404).send("User not found");
+    }
+    const id = user.id;
+    const sessionDeletedCount = await Session.destroy({ where: { id_user:id } });
+    if (sessionDeletedCount === 0) {
+      return res.status(404).send("Session not found");
+    }
     console.log("User logged out successfully");
     res.status(200).send("User logged out successfully");
   } catch (error) {

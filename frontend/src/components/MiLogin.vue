@@ -3,14 +3,14 @@
     <h1 class="title">Sign In</h1>
     <div>
       <form action class="form" @submit.prevent="login">
-        <label class="form-label">Username:</label>
+        <label class="form-label">Email:</label>
         <input
-          v-model="username"
+          v-model="email"
           class="form-input"
           type="text"
-          id="username"
+          id="email"
           required
-          placeholder="Username"
+          placeholder="Email"
         />
         <label class="form-label">Password:</label>
         <input
@@ -27,9 +27,6 @@
           <button @click="loginGoogle" class="button google">
             <v-icon left>mdi-google</v-icon> Sign in with Google
           </button>
-          <!-- <a class="button google" href="localhost:3000/api/google">
-            Sign in with Google</a
-          > -->
         </div>
       </form>
     </div>
@@ -48,22 +45,22 @@
 </template>
 
 <script>
-import AuthService from "@/services/auth/auth.service.ts";
+import AuthService from "@/services/auth.service.ts";
 
 export default {
   data: () => ({
-    username: "",
+    email: "",
     password: "",
     error: false,
     errorMesage: "",
   }),
   methods: {
     async login() {
-      if (!this.username || !this.password) {
-        console.log("Username and password are required");
-        console.error("Username and password are required");
+      if (!this.email || !this.password) {
+        console.log("email and password are required");
+        console.error("email and password are required");
         this.error = true;
-        this.errorMesage = "Username and password are required";
+        this.errorMesage = "email and password are required";
         return;
       }
       //ValidatePassword
@@ -108,17 +105,16 @@ export default {
           password: this.password,
         });
         //auth.setUserLogged(user);
-        const user = response.user;
-        console.log(user.role.value);
-        console.log("--------------------");
-        localStorage.setItem("user", JSON.stringify(user));
-        if (user.role == "1") {
+        const infoUser = response.infoUser;
+        const userToken = response.data.loginToken;
+        localStorage.setItem("user", JSON.stringify(infoUser));
+        if (infoUser.role == "1") {
           this.$router.push(
-            "/student?token=" + user.access_token + "&typelogin=manual"
+            "/student?token=" + userToken + "&typelogin=manual"
           );
-        } else if (user.role == "2") {
+        } else if (infoUser.role == "2") {
           this.$router.push(
-            "/teacher?token=" + user.access_token + "&typelogin=manual"
+            "/teacher?token=" + userToken + "&typelogin=manual"
           );
         }
       } catch (error) {
@@ -129,9 +125,6 @@ export default {
     async loginGoogle() {
       try {
         window.location.href = "http://localhost:3000/api/google";
-        //localStorage.setItem("user", JSON.stringify(user));
-        // const response = await AuthService.loginGoogle();
-        // console.log(response);
       } catch (error) {
         console.error(error);
         this.error = true;

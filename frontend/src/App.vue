@@ -1,14 +1,15 @@
 <template>
   <div id="app">
     <div class="content">
-      <nav>
+      <!-- <nav>
         <router-link to="/login">Login</router-link> |
         <router-link to="/teacher">Home-Teacher</router-link> |
         <router-link to="/student">Home-Student</router-link> |
         <router-link to="/changeCredentials">changeCredentials</router-link> |
         <router-link to="/profileSt">ProfileStud</router-link> |
-        <router-link to="/profileTe">ProfileTeach</router-link>
-      </nav>
+        <router-link to="/profileTe">ProfileTeach</router-link> |
+        <router-link to="/Error404">404</router-link> |
+      </nav> -->
       <div class="main-content">
         <router-view />
       </div>

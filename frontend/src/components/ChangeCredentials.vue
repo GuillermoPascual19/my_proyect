@@ -13,7 +13,7 @@
           class="ma-2"
           color="purple"
           icon="mdi-exit-to-app"
-          @click="cerrarSesion"
+          @click="logOut"
         ></v-btn>
         <span class="text">Close Session</span>
       </router-link>
@@ -86,8 +86,8 @@
 <script>
 import SidebarComponent from "../components/complementsApp/SideBar.vue";
 import { FwbSelect } from "flowbite-vue";
-import userService from "../services/user/user.service";
-import authService from "../services/auth/auth.service";
+import userService from "../services/user.service";
+import authService from "../services/auth.service";
 
 export default {
   name: "ComponenteRegistro",
@@ -225,9 +225,9 @@ export default {
         this.$router.push("/teacher?token=" + user.access_token);
       }
     },
-    async cerrarSesion() {
+    async logOut() {
       try {
-        await authService.logout();
+        await authService.logOut();
         localStorage.removeItem("user");
         this.$router.push("/login");
       } catch (error) {

@@ -9,7 +9,6 @@ import {
   getStudents,
   closeSession,
   uploadImages,
-  deleteUser,
   changeCrendentials,
   assignSubject,
   unassignSubject,
@@ -36,7 +35,7 @@ router.post("/signin", loginUser);
 router.post("/loginGoogle", loginGoogle);
 router.post("/change-password", changePassword);
 router.post("/upload-image", [upload.single("file")], uploadImages);
-router.post("/logout", [verifyToken], closeSession);
+router.post("/closeSession", [verifyToken], closeSession);
 router.post("/changeCredentials", [verifyToken], changeCrendentials);
 router.post("/assign-subject", assignSubject);
 router.post("/unassign-subject", unassignSubject);
