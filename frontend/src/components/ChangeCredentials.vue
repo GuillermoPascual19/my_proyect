@@ -54,19 +54,6 @@
             placeholder="Email"
           />
         </div>
-        <div class="form-group">
-          <label class="form-label">Role</label>
-          <flowbite-themable :theme="theme">
-            <fwb-select
-              text="Role"
-              class="form-select"
-              v-model="selected"
-              required
-              :options="rolesOpt"
-            >
-            </fwb-select>
-          </flowbite-themable>
-        </div>
         <div class="form-group full-width">
           <v-btn class="ma-2" color="green" @click="ChangeInfo">
             Accept
@@ -85,7 +72,6 @@
 
 <script>
 import SidebarComponent from "../components/complementsApp/SideBar.vue";
-import { FwbSelect } from "flowbite-vue";
 import userService from "../services/user.service";
 import authService from "../services/auth.service";
 
@@ -96,13 +82,6 @@ export default {
     name: "",
     email: "",
     surname: "",
-    accessToken: "3rhb23uydb238ry6g2429hrh",
-    selected: "",
-    rolesOpt: [
-      { value: "1", name: "Student" },
-      { value: "2", name: "Teacher" },
-    ],
-    rol: "",
     theme: "dark",
     subjects: [],
     selectedFile: null,
@@ -112,7 +91,6 @@ export default {
   }),
   //Components
   components: {
-    FwbSelect,
     SidebarComponent,
   },
   //Methods
@@ -147,7 +125,7 @@ export default {
       }
     },
     async changeInfo() {
-      if (!this.name || !this.surname || !this.email || !this.selected) {
+      if (!this.name || !this.surname || !this.email) {
         console.log("All fields are required");
         this.errorMessage.value = "All fields are required";
         return;
@@ -176,27 +154,27 @@ export default {
           this.errorMessage.value = "User not found";
           return;
         }
-        if (this.selected === "") {
-          this.selected = user.role;
-        } else if (this.name === "") {
+        if (this.name === "") {
           this.name = user.name;
         } else if (this.surname === "") {
           this.surname = user.surname;
         } else if (this.email === "") {
           this.email = user.email;
         }
-        this.rol = this.selected;
+        const loginToken = localStorage.getItem("loginToken");
         const response = await userService.changeCredentials({
           name: this.name,
           surname: this.surname,
           email: this.email,
-          role: this.selected,
           id: user.id,
+          access_token: loginToken,
         });
-        if (user.role === "1") {
-          this.$router.push("/student?token=" + user.access_token);
+        const userInfo = response.infoUser;
+        localStorage.setItem("user", JSON.stringify(userInfo));
+        if (userInfo.role === "1") {
+          this.$router.push("/student?token=" + loginToken);
         } else {
-          this.$router.push("/teacher?token=" + user.access_token);
+          this.$router.push("/teacher?token=" + loginToken);
         }
         console.log(response);
         this.message = response.message;
@@ -211,7 +189,6 @@ export default {
       this.name = "";
       this.surname = "";
       this.email = "";
-      this.selected = "";
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user) {
         console.log("User not found");
@@ -227,12 +204,16 @@ export default {
     },
     async logOut() {
       try {
-        await authService.logOut();
+        const infoUser = JSON.parse(localStorage.getItem("user"));
         localStorage.removeItem("user");
+        console.log("Cerrando sesión para el usuario con id:", infoUser.id);
+        const access_token = infoUser.access_token;
+        console.log("Access token:", access_token);
+        await authService.logOut(access_token);
         this.$router.push("/login");
+        this.flagLogged = false;
       } catch (error) {
         console.error("Error al cerrar sesión:", error);
-        this.errorMessage = "Error al cerrar sesión";
       }
     },
   },

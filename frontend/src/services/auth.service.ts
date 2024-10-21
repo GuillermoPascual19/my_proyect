@@ -5,8 +5,10 @@ class AuthService {
     const { email, password } = userData;
     // Validate data
     if (!email || !password) {
+      console.error("AuthService.login: email, password", email, password);
       throw new Error("All fields are required");
     }
+    console.log("AuthService.login: email, password", email, password);
     return api
       .post("/signin", { email, password })
       .then((response) => {
@@ -74,18 +76,23 @@ class AuthService {
     }
     return api.post("/loginGoogle", { idToken }).then((response) => {
       console.log("authService.loginGoogle:", response);
+      console.log("authService.loginGoogle:", response.data);
       return response.data;
     });
   }
 
-  logOut(userData: { access_token: string }) {
-    const { access_token } = userData;
+  logOut(access_token: string) {
+    console.log("access_token", access_token);
     // Validate data
     if (!access_token) {
       throw new Error("AuthService.Access_token is required");
     }
     console.log("AuthService.cerrarSesion hasta aquí esta bien");
-    return api.post("/closeSession", { access_token });
+    return api.post(
+      "/closeSession",
+      { access_token },
+      { headers: { Authorization: `Bearer ${access_token}` } }
+    );
   }
 }
 

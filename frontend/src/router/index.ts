@@ -3,14 +3,14 @@ import HomeViewStudent from "../views/HomeView-Student.vue";
 import HomeViewTeacher from "../views/HomeView-Teacher.vue";
 import CompRegistro from "@/components/CompRegistro.vue";
 import MiLogin from "@/components/MiLogin.vue";
-import OlvidoC from "@/components/OlvidoC.vue";
+import RecoverPwd from "@/components/RecoverPwd.vue";
 import ActivarCuenta from "@/components/ActivarCuenta.vue";
 import CambiarC from "@/components/CambiarC.vue";
 import changeCredentials from "@/components/ChangeCredentials.vue";
 import profileStudent from "@/components/ProfileView-Student.vue";
 import profileTeacher from "@/components/ProfileView-Teacher.vue";
 import Error404 from "@/views/Error404.vue";
-//import ComponenteChat from "@/components/ComponenteChat.vue";
+import ChatView from "@/views/ChatViewTest.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -44,9 +44,9 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: false },
   },
   {
-    path: "/forgot",
-    name: "OlvidoC",
-    component: OlvidoC,
+    path: "/recoverPwd",
+    name: "RecoverPwd",
+    component: RecoverPwd,
     meta: { requiresAuth: false },
   },
   {
@@ -79,17 +79,30 @@ const routes: Array<RouteRecordRaw> = [
     component: profileTeacher,
     meta: { requiresAuth: true },
   },
-  // {
-  //   path: "/teamschat",
-  //   name: "ComponenteChat",
-  //   component: ComponenteChat,
-  // },
   {
-    path: "/Error404",
+    path: "/chat",
+    name: "ChatView",
+    component: ChatView,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: "/Error",
     name: "404",
     component: Error404,
     meta: { requiresAuth: false },
   },
+  // {
+  //   path: "/teListChat",
+  //   name: "teListChat",
+  //   component: () => import("../components/ViewListTe.vue"),
+  //   meta: { requiresAuth: false },
+  // },
+  // {
+  //   path: "/stListChat",
+  //   name: "stListChat",
+  //   component: () => import("../components/ViewListSt.vue"),
+  //   meta: { requiresAuth: false },
+  // },
   {
     path: "/about",
     name: "about",

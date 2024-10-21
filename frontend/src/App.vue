@@ -2,13 +2,11 @@
   <div id="app">
     <div class="content">
       <!-- <nav>
-        <router-link to="/login">Login</router-link> |
-        <router-link to="/teacher">Home-Teacher</router-link> |
         <router-link to="/student">Home-Student</router-link> |
-        <router-link to="/changeCredentials">changeCredentials</router-link> |
         <router-link to="/profileSt">ProfileStud</router-link> |
         <router-link to="/profileTe">ProfileTeach</router-link> |
         <router-link to="/Error404">404</router-link> |
+        <router-link to="/chat">Chat</router-link> |
       </nav> -->
       <div class="main-content">
         <router-view />
@@ -30,6 +28,7 @@ body,
   display: flex;
   flex-direction: column;
   min-width: 100%;
+  height: 100%;
   background-color: #f1f7ef;
 }
 

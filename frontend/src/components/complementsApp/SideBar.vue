@@ -16,7 +16,7 @@
         <v-icon>mdi-eye</v-icon>
         <span class="text">About</span>
       </router-link>
-      <router-link to="/team" class="button">
+      <router-link to="/chat" class="button">
         <v-icon>mdi-account-group</v-icon>
         <span class="text">TeamsChat</span>
       </router-link>
@@ -70,7 +70,7 @@ const goToChangeCredentials = () => {
     console.error("No user, please login");
     router.push("/login");
   } else {
-    router.push("/settings");
+    router.push("/settings?token=" + user.access_token);
   }
 };
 </script>

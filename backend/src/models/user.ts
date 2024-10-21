@@ -46,6 +46,9 @@ export class User extends Model<User, UserCreationAttributes> {
   @Column({})
   declare id: number;
 
+  @HasMany(() => Session, { foreignKey: "id_user", as: "userSession" })
+  userSession!: Session[];
+
   @HasMany(() => Students_teachers, { foreignKey: "id_student", as: "studentTeachers" })
   studentTeachers!: Students_teachers[];
 

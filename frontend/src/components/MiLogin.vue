@@ -1,5 +1,5 @@
 <template>
-  <div class="register">
+  <div class="app">
     <h1 class="title">Sign In</h1>
     <div>
       <form action class="form" @submit.prevent="login">
@@ -22,6 +22,9 @@
           placeholder="Password"
         />
         <input class="form-submit" type="submit" value="Sign In" />
+        <button class="button-submit" @click="login" color="primary" dark>
+          Sign In
+        </button>
         <p class="error" v-if="error">{{ errorMesage }}</p>
         <div class="signinG">
           <button @click="loginGoogle" class="button google">
@@ -36,7 +39,7 @@
         <router-link to="/registro">Sign up</router-link>
       </p>
       <router-link
-        to="/forgot"
+        to="/recoverPwd"
         class="ms-auto text-sm font-medium text-blue-600 hover:underline dark:text-blue-500"
         >Lost Password?</router-link
       >
@@ -56,6 +59,8 @@ export default {
   }),
   methods: {
     async login() {
+      console.log("password", this.password);
+      console.log("email", this.email);
       if (!this.email || !this.password) {
         console.log("email and password are required");
         console.error("email and password are required");
@@ -101,12 +106,13 @@ export default {
       //Funcionality
       try {
         const response = await AuthService.login({
-          username: this.username,
+          email: this.email,
           password: this.password,
         });
         //auth.setUserLogged(user);
+        console.log("response", response);
         const infoUser = response.infoUser;
-        const userToken = response.data.loginToken;
+        const userToken = response.loginToken;
         localStorage.setItem("user", JSON.stringify(infoUser));
         if (infoUser.role == "1") {
           this.$router.push(
@@ -136,8 +142,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.login {
-  padding: 2rem;
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f1f7ef;
+  //background: #2c3e50;
 }
 .title {
   text-align: center;
@@ -184,6 +196,18 @@ export default {
   border: none;
   color: white;
   margin-top: 3rem;
+  padding: 1rem 0;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover {
+    background: #0b9185;
+  }
+}
+.button-submit {
+  background: #1ab188;
+  border: none;
+  color: white;
+  margin-top: 5rem;
   padding: 1rem 0;
   cursor: pointer;
   transition: background 0.2s;

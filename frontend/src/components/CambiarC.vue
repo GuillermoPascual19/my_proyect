@@ -54,7 +54,7 @@ export default {
       if (!this.password_token) {
         console.log("Password Token is required");
         console.error("Password Token is required");
-        return;
+        this.$router.push("/Error");
       }
       //ValidatePassword
       if (this.newPassword.length < 8) {

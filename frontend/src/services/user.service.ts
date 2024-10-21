@@ -43,8 +43,9 @@ class UserService {
     email: string;
     role: number;
     id: number;
+    access_token: string;
   }) {
-    const { name, surname, email, role, id } = userData;
+    const { name, surname, email, role, id, access_token } = userData;
     // Validate data
     if (!surname) {
       throw new Error("Username is required");
@@ -54,11 +55,21 @@ class UserService {
       throw new Error("Access_Token is required");
     } else if (!name) {
       throw new Error("Name is required");
+    } else if (!access_token) {
+      throw new Error("Access_Token is required");
     }
-    return api.post("/changeCredentials", { name, surname, email, role, id });
+    return api.post(
+      "/changeCredentials",
+      { name, surname, email, role, id },
+      { headers: { Authorization: `Bearer ${access_token}` } }
+    );
   }
-  assignSubject(userData: { id: number; email: string; subject: string }) {
-    const { id, email, subject } = userData;
+  assignSubject(userData: {
+    access_token: string;
+    email: string;
+    subject: string;
+  }) {
+    const { access_token, email, subject } = userData;
     // Validate data
     if (!email) {
       throw new Error("Email is required. Insert a valid email");
@@ -66,7 +77,7 @@ class UserService {
       throw new Error("Subject is required. Insert a valid subject");
     }
     console.log(userData);
-    return api.post("/assign-subject", { id: id, email, subject });
+    return api.post("/assign-subject", { access_token, email, subject });
   }
   unassignSubject(userData: { id: number; email: string; subject: string }) {
     const { id, email, subject } = userData;
@@ -93,6 +104,27 @@ class UserService {
       throw new Error("Id is required");
     }
     return api.post("/num-stud-subject", { id });
+  }
+  getUsers() {
+    return api.get("/users");
+  }
+  changeRole(userData: { email: string; role: number }) {
+    const { email, role } = userData;
+    // Validate data
+    if (!email) {
+      throw new Error("Email is required");
+    } else if (!role) {
+      throw new Error("Role is required");
+    }
+    return api.post("/change-role", { email, role });
+  }
+  deleteUser(userData: { email: string }) {
+    const { email } = userData;
+    // Validate data
+    if (!email) {
+      throw new Error("Email is required");
+    }
+    return api.post("/delete-user", { email });
   }
   uploadImage(userData: unknown) {
     console.log(userData);

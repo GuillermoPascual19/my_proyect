@@ -66,7 +66,6 @@ const sendWelcomeEmail = async (user: User): Promise<void> => {
 };
 
 //Registro de usuario----------------------------------------------
-
 export const registerUser = async (req: Request, res: Response) => {
   if (!req.body)
     return res.status(401).json({ message: "The request body is empty" });
@@ -191,17 +190,18 @@ export const loginUser = async (req: Request, res: Response) => {
             process.env.JWT_SECRET || "secret", 
             { expiresIn: "1h" }
           );
-          console.log("User logged in successfully");
-
+      
           const infoUser = {
-            id: user.id,
-            name: user.name,
-            surname: user.surname,
-            email: user.email,
-            image: user.image,
-            role: user.role,
+            id: user.dataValues.id,
+            name: user.dataValues.name,
+            username: user.dataValues.username,
+            surname: user.dataValues.surname,
+            email: user.dataValues.email,
+            image: user.dataValues.image,
+            role: user.dataValues.role,
             access_token: loginToken,
           };
+          console.log("User logged in successfully", infoUser);
           
           user.access_token = loginToken;
           return res
@@ -226,12 +226,15 @@ export const loginGoogle = async (req: Request, res: Response) => {
     return res.status(404).send("IdToken is required, login please"); 
   }
   try {
-    let user = await User.findOne({ where: { access_token: idToken } });
+    let user = await User.findOne({
+      where: { access_token: idToken },
+      attributes: ['id', 'username', 'name', 'surname', 'email', 'image', 'role', 'access_token']
+    });
     if (!user) {
       return res.status(404).send("User not found");
     }
-    
-    user = await user.save();
+    console.log("{{{{{{{{{{{{{{{{{\n\n",user.dataValues);
+    console.log("\n\n{{{{{{{{{{{{{{{{{");
     
     const loginToken = jwt.sign(
       {
@@ -241,29 +244,33 @@ export const loginGoogle = async (req: Request, res: Response) => {
       process.env.JWT_SECRET || "secret", 
       { expiresIn: "1h" }
     );
-    user.access_token = loginToken;
-    user = await user.save();
+
     const infoUser = {
-      id: user.id,
-      name: user.name,
-      surname: user.surname,
-      email: user.email,
-      image: user.image,
-      role: user.role,
-      access_token: user.access_token,
+      id: user.dataValues.id,
+      name: user.dataValues.name,
+      username: user.dataValues.username,
+      surname: user.dataValues.surname,
+      email: user.dataValues.email,
+      image: user.dataValues.image,
+      role: user.dataValues.role,
+      access_token: loginToken,
     };
+    //user.set({ access_token: loginToken });
+    // user.access_token = loginToken;
+    User.update({ access_token: loginToken }, { where: { id: user.id } });
+    //user = await user.save();
     
-    
-    console.log("User logged in successfully");
+    console.log("**********\nUser logged in successfully", infoUser);
+    console.log("[[[[[[[[[[[\n\n",user);
+    console.log("\n\n]]]]]]]]]]]");
     res.status(200).send({ loginToken, infoUser });
   } catch (error) {
-    console.error("Error logging in, can´t find this user:", error); // Log para capturar el error
+    console.error("Error logging in, can´t find this user:", error);
     return res.status(500).json({ message: "CAFE Server error", error });
   } 
 };
 
 //Activar cuenta de usuario----------------------------------------------
-
 export const activateAccount = async (req: Request, res: Response) => {
   const { access_token } = req.body;
 
@@ -448,7 +455,7 @@ export const getSubjectsByStudent = async (req: Request, res: Response) => {
 //Obtener estudiantes----------------------------------------------
 export const getStudents = async (req: Request, res: Response) => {
   try {
-    console.log("Getting students");
+    //console.log("Getting students");
     const students = await User.findAll({
       where: { role: 1 },
       attributes: ["name", "surname", "email"],
@@ -475,18 +482,17 @@ export const getStudents = async (req: Request, res: Response) => {
       console.log("Student:", temp);
       const subjects =
         temp.studentTeachers.length > 0
-          ? temp.studentTeachers.map(
-              (st) => st.subjectStdTe?.subject_name || " -"
-            )
+          ? temp.studentTeachers
+              .map((st) => st.subjectStdTe?.subject_name || " -")
+              .join(", ") // Aquí se unen las asignaturas en un string
           : " - ";
       return {
         name: temp.name,
         surname: temp.surname,
         email: temp.email,
-        subjects: subjects,
+        subjects: subjects, // Esto ahora es una cadena de texto
       };
     });
-    console.log("Student subjects:", studentData);
     return res.status(200).json(studentData);
   } catch (error) {
     console.error("Error getting students:", error);
@@ -498,19 +504,19 @@ export const closeSession = async (req: Request, res: Response) => {
   const { access_token } = req.body;
 
   if (!access_token) {
-    return res.status(404).send("UserId is required");
+    return res.status(403).send("UserId is required");
   }
   try {
     const user = await User.findOne({ where: { access_token } });
     if(!user){
-      return res.status(404).send("User not found");
+      return res.status(402).send("User not found");
     }
-    const id = user.id;
-    const sessionDeletedCount = await Session.destroy({ where: { id_user:id } });
+    const sessionDeletedCount = await Session.destroy({ where: { id_user: user.id } });
     if (sessionDeletedCount === 0) {
+      console.log("\n\nSession not found with id:", user.id);
       return res.status(404).send("Session not found");
     }
-    console.log("User logged out successfully");
+    console.log("\nUser logged out successfully");
     res.status(200).send("User logged out successfully");
   } catch (error) {
     console.error("Error logging out:", error);
@@ -537,26 +543,18 @@ export const changeCrendentials = async (req: Request, res: Response) => {
     user.set({ role: rol, email, name, surname });
     user = await user.save();
 
-    try {
-      // Generar el JWT
-      const loginToken = jwt.sign(
-        {
-          id: user.id,
-          username: user.username,
-          name: user.name,
-          surname: user.surname,
-          email: user.email,
-          role: user.role,
-        },
-        process.env.JWT_SECRET || "secret", // Asegúrate de usar una clave secreta segura
-        { expiresIn: "1h" }
-      );
-    } catch (error) {
-      console.error("Error generating token:", error);
-      return res.status(500).json({ message: "Server error", error });
-    }
+    const infoUser = {
+      id: user.dataValues.id,
+      name: user.dataValues.name,
+      username: user.dataValues.username,
+      surname: user.dataValues.surname,
+      email: user.dataValues.email,
+      image: user.dataValues.image,
+      role: user.dataValues.role,
+      access_token: user.dataValues.access_token,
+    };
     console.log("User credentials changed successfully");
-    res.status(200).json(user);
+    res.status(200).json(infoUser);
   } catch (error) {
     console.error("Error changing user credentials:", error);
     return res.status(500).json({ message: "Server error", error });
@@ -565,14 +563,15 @@ export const changeCrendentials = async (req: Request, res: Response) => {
 
 //Asignar asignatura----------------------------------------------
 export const assignSubject = async (req: Request, res: Response) => {
-  const { id, email, subject } = req.body;
+  const { access_token, email, subject } = req.body;
 
-  if (!email || !subject || !id) {
-    console.log("Email, id, and subject are required");
+  if (!email || !subject || !access_token) {
+    console.log("Email, access_token, and subject are required");
     return res.status(400).send("Email, id, and subject are required");
   }
 
-  const transaction = await sequelize.transaction(); // Start transaction
+  const transaction = await sequelize.transaction(); 
+  // Transaction, o todas las operaciones de base funcionan o a la cachiporra
 
   try {
     console.log(
@@ -584,7 +583,7 @@ export const assignSubject = async (req: Request, res: Response) => {
       return res.status(404).send("User student not found");
     }
 
-    const userTe = await User.findOne({ where: { id }, transaction });
+    const userTe = await User.findOne({ where: { access_token }, transaction });
     if (!userTe) {
       console.log("User teacher not found");
       return res.status(404).send("User teacher not found");
@@ -732,6 +731,70 @@ export const uploadImages = async (req: Request, res: Response) => {
     res.status(200).json(user);
   } catch (error) {
     console.error("Error uploading image:", error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
+//Obtener usuarios de la web----------------------------------------------
+export const getUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await User.findAll({
+      attributes: ["username", "name", "surname", "email", "role"],
+    });
+    if (!users || !users.length) {
+      console.log("No users found.");
+      return res.status(404).send("No users found.");
+    }
+    console.log("Users:", users);
+    return res.status(200).json(users);
+  } catch (error) {
+    console.log("Error getting users");
+    console.error("Error getting users:", error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
+//Cambiar rol de usuario----------------------------------------------
+export const changeRole = async (req: Request, res: Response) => {
+  const { email, role } = req.body;
+  if (!email || !role) {
+    return res.status(400).send("Email and role are required");
+  }
+
+  try {
+    let user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    User.update({ role }, { where: { email } });
+    console.log("User role changed successfully");
+    res.status(200).send("User role changed successfully");
+  } catch (error) {
+    console.error("Error changing user role:", error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
+//Eliminar usuario----------------------------------------------
+export const deleteUser = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).send("Email is required");
+  }
+
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    await User.destroy({ where: { email } });
+    await Session.destroy({ where: { id_user: user.id } });
+    if (user.role === 1) {
+      await Students_teachers.destroy({ where: { id_student: user.id } });
+    } else {
+      await Students_teachers.destroy({ where: { id_teacher: user.id } });
+    }
+    console.log("User deleted successfully");
+    res.status(200).send("User deleted successfully");
+  } catch (error) {
+    console.error("Error deleting user:", error);
     return res.status(500).json({ message: "Server error", error });
   }
 };

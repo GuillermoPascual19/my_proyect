@@ -14,6 +14,9 @@ import {
   unassignSubject,
   getNumStudentsPerSubject,
   loginGoogle,
+  getUsers,
+  changeRole,
+  deleteUser,
 } from "../controllers/user.controller";
 
 import { verifyToken, upload } from "../middleware/logger.middleware";
@@ -40,6 +43,9 @@ router.post("/changeCredentials", [verifyToken], changeCrendentials);
 router.post("/assign-subject", assignSubject);
 router.post("/unassign-subject", unassignSubject);
 router.post("/num-stud-subject", getNumStudentsPerSubject);
+router.get("/users", getUsers);
+router.get("/change-role", changeRole);
+router.post("/delete-user", deleteUser);
 // Ruta para Google Sign-In
 router.get(
   "/google",
@@ -69,11 +75,11 @@ router.get(
     //Crear una variable de entorno para la url, de tal manera que pueda acceder a http:localhost:8080
     //Si no especifico http:localhost:8080, me redirige a asi mismo, es decir, "busca entre los endpoints"
     if (userRole === 1) {
-      res.redirect(`http://localhost:8080/student?token=${accessToken}&typelogin=google`);
+      res.redirect(`http://localhost:8081/student?token=${accessToken}&typelogin=google`);
     } else if (userRole === 2) {
-      res.redirect(`http://localhost:8080/teacher?token=${accessToken}&typelogin=google`);
+      res.redirect(`http://localhost:8081/teacher?token=${accessToken}&typelogin=google`);
     } else {
-      res.redirect(`http://localhost:8080/login`);
+      res.redirect(`http://localhost:8081/login`);
     }
   }
 );

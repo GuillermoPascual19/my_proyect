@@ -15,7 +15,7 @@ export const verifyToken = (req: Request, res: Response, next: Function) => {
       token as string,
       process.env.JWT_SECRET || "secret"
     );
-    req.user = decoded as decodedToken; // Guardamos los datos del usuario decodificados en req.user
+    req.user = decoded as decodedToken; 
     
     // Buscar usuario
 

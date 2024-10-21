@@ -9,7 +9,7 @@
     </div>
 
     <div class="botones">
-      <router-link to="/settings" class="button">
+      <div class="button">
         <v-btn
           class="ma-2"
           color="purple"
@@ -17,7 +17,7 @@
           @click="changeCredentials"
         ></v-btn>
         <span class="text">Settings</span>
-      </router-link>
+      </div>
       <router-link to="/login" class="button">
         <v-btn
           class="ma-2"
@@ -163,9 +163,14 @@ export default {
     },
     async logOut() {
       try {
-        await authService.logOut();
+        const infoUser = JSON.parse(localStorage.getItem("user"));
         localStorage.removeItem("user");
+        console.log("Cerrando sesión para el usuario con id:", infoUser.id);
+        const access_token = infoUser.access_token;
+        console.log("Access token:", access_token);
+        await authService.logOut(access_token);
         this.$router.push("/login");
+        this.flagLogged = false;
       } catch (error) {
         console.error("Error al cerrar sesión:", error);
       }
