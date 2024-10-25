@@ -2,7 +2,6 @@ import "dotenv/config";
 import sequelize from "./config/database";
 import express, { Request, Response } from "express";
 
-import bodyParser from "body-parser";
 import app from "./app";
 var db = require("./config/database");
 import Session from "./models/session";
@@ -10,9 +9,22 @@ import User from "./models/user";
 
 import { Server, Socket } from "socket.io";
 const server = require("http").Server(app);
-let io = require("socket.io")(server);
+const io: Server = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 import path from "path";
 
+let mongoose = require("mongoose");
+const dbUrl = `mongodb+srv://${process.env.MONGOOSE_USER}:${process.env.MONGOOSE_PASS}@cluster0.fh2vc.mongodb.net/`;
+
+import bodyParser from "body-parser";
+import { Schema } from "mongoose";
+import { UUID } from "sequelize";
+import { createObjectCsvWriter } from "csv-writer";
+import fs from "fs";
 //------------------------Conectar el backend con la base de datos------------------------
 const PORT = process.env.PORT || 3001;
 
@@ -83,49 +95,118 @@ passport.use(
 );
 
 app.use(passport.initialize());
-console.log(path.join(__dirname, "../../frontend/dist"));
-//Socket.io
+//--------------------------Socket.io--------------------------------
+const Mensajes = mongoose.model(
+  "Mensaje",
+  new Schema({
+    id: { type: Schema.Types.Number, required: true }, // Cambiar ObjectId a Number
+    id_room: { type: Schema.Types.Number, required: true },
+    message: {
+      userName: { type: Schema.Types.String, required: true },
+      text: { type: Schema.Types.String, required: true },
+      date: { type: Schema.Types.Date, required: true }, // Asegúrate de que esta sea una fecha válida
+    },
+  })
+);
+
 app.use(express.static(path.join(__dirname, "../../frontend/dist")));
-// // Si no se encuentra la ruta, servir el archivo de Vue.js
-app.get('*', (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '../../frontend/dist', 'index.html'));
+app.get("*", (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, "../../frontend/dist", "index.html"));
 });
 
-io = new Server(server, {
-  cors: {
-    origin: "http://localhost:8080",  // Tu frontend
-    methods: ["GET", "POST"]
-  }
-});
-
-server.listen(8000, function () {
-  ////Pondremos el servidor a escuchar en localhost con el puerto 8080
+server.listen(8001, function () {
   console.log("Servidor corriendo en http://localhost:8000");
 });
 
-// Array de mensajes inicial
-let mensajes = [
-  { profesor: "Julio", texto: "Hola! ¿Cómo estáis?" },
-  { profesor: "Alumno1", texto: "Muy bien! ¿y tú?" },
-];
-console.log("\n\n\n");  
+console.log("\n\n\n");
 console.log("Server is running on port 8080");
 console.log("\n\n\n");
-// Servidor de WebSockets
-io.on("connection", (socket: Socket) => {
-  console.log("Un cliente se ha conectado");
+//------------------------- Servidor de WebSockets -------------------------
+const socketMap = {};
+io.on("connection", async (socket: Socket) => {
+  console.log("Un cliente se ha conectado", socket.id);
+  let socketRoom: any;
+  socket.on("disconnect", () => {
+    console.log("Un cliente se ha desconectado", socket.id);
+  });
 
-  // Enviar los mensajes actuales al cliente que se conecta
-  socket.emit("mensajes", mensajes);
+  socket.on("join", (room) => {
+    console.log(`Un cliente ${socket.id} se ha unido a la sala` + room);
+    socketRoom = room;
+    socket.join(room);
+  });
+  // Enviar los mensajes actuales al cliente que se conecta => via broadcast
+  //socket.emit("mensajes", Mensajes);
 
   // Escuchar mensajes entrantes del cliente
-  socket.on("mensajes", (data) => {
+  socket.on("chat", async (data) => {
     console.log("Mensaje recibido:", data);
-    mensajes.push(data); // Añadir mensaje al array de mensajes
+    const { id, id_room, message } = data;
+    //console.log(`msg: ${message}, room: ${id_room}`);
+    try {
+      // Crear y guardar un nuevo mensaje en la base de datos MongoDB
+      const nuevoMensaje = new Mensajes({
+        id: data.id,
+        id_room: data.id_room,
+        message: {
+          userName: message.userName,
+          text: message.text,
+          date: message.date,
+        },
+      });
+      console.log(nuevoMensaje);
+      await nuevoMensaje.save(); // Esto guarda el mensaje en MongoDB
 
-    // Enviar el mensaje a todos los clientes conectados
-    io.emit("mensajes", mensajes);
+      // Recuperar todos los mensajes guardados en la base de datos para enviarlos a los clientes
+      const mensajes = await Mensajes.find(); // Aquí recuperamos todos los mensajes
+
+      // Enviar el array de mensajes actualizados a todos los clientes conectados
+      console.log(`Socket Room ${socketRoom}`);
+      socket.to(socketRoom).emit("chat", message);
+    } catch (error) {
+      console.error("Error al guardar o recuperar mensajes:", error);
+    }
   });
+});
+
+//--------------------------Mongoose>DataBase--------------------------------
+(async () => {
+  try {
+    await mongoose.connect(dbUrl);
+    console.log("MongoDB conectado correctamente");
+  } catch (err) {
+    console.error("Error al conectar a MongoDB:", err);
+  }
+})();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.get("/mensajes", (req: Request, res: Response) => {
+  Mensajes.find({}, (err: any, mensajes: any) => {
+    res.send(mensajes);
+  });
+});
+
+app.post("/mensajes", async (req, res) => {
+  console.log("Mensaje recibido:", req.body);
+  const mensaje = new Mensajes({
+    id: req.body.id,
+    id_room: req.body.id_room || 1,
+    message: {
+      userName: req.body.message.userName,
+      text: req.body.message.text,
+      date: new Date(req.body.message.date),
+    },
+  });
+  try {
+    await mensaje.save();
+    io.emit("mensaje", req.body);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Error al guardar el mensaje:", err);
+    res.sendStatus(500);
+  }
 });
 
 start().then(() => {

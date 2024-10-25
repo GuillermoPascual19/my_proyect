@@ -16,6 +16,10 @@ import exp from "constants";
 import bodyparser from "body-parser";
 import { access } from "fs";
 
+const { createObjectCsvWriter } = require('csv-writer');
+const fs = require('fs');
+
+
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
@@ -734,6 +738,15 @@ export const uploadImages = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Server error", error });
   }
 };
+//Subir imagen AWS S3----------------------------------------------
+export const uploadImagesS3 = async (req: Request, res: Response) => {
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 5 * 1024 * 1024, // no more than 5mb
+    },
+  });
+};
 //Obtener usuarios de la web----------------------------------------------
 export const getUsers = async (req: Request, res: Response) => {
   try {
@@ -772,6 +785,42 @@ export const changeRole = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Server error", error });
   }
 };
+
+// //Exportar mensajes CSV----------------------------------------------
+// export const exportCSV = async (req: Request, res: Response) => {
+//   const mensajes = {
+//     userName: 'User Name',
+//     text: 'Message',
+//     date: 'Date',
+//   }
+//   const csvWriter = createObjectCsvWriter({
+//     path: 'mensajes.csv',
+//     header: [
+//       { id: 'userName', title: 'User Name' },
+//       { id: 'text', title: 'Message' },
+//       { id: 'date', title: 'Date' },
+//     ],
+//   });
+
+//   await csvWriter.writeRecords(mensajes);
+
+//   // Enviar el archivo CSV al frontend
+//   const filePath = path.join(__dirname, 'mensajes.csv');
+//   res.download(filePath, 'mensajes.csv', (err) => {
+//     if (err) {
+//       console.error('Error al descargar el archivo CSV:', err);
+//       res.status(500).send('Error al descargar el archivo');
+//     } else {
+//       // Elimina el archivo después de enviarlo
+//       fs.unlink(filePath, (err: any) => {
+//         if (err) {
+//           console.error('Error al eliminar el archivo:', err);
+//         }
+//       });
+//     }
+//   });
+// };
+
 //Eliminar usuario----------------------------------------------
 export const deleteUser = async (req: Request, res: Response) => {
   const { email } = req.body;
@@ -798,3 +847,5 @@ export const deleteUser = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Server error", error });
   }
 };
+
+

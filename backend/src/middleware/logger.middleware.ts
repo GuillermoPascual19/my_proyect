@@ -2,6 +2,17 @@ import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express"; // Import the Request type from the express package
 import { decodedToken } from "../../typings/express";
 import multer from "multer";
+import app from "../app";
+const AWS = require("aws-sdk");
+
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+
+const s3 = new AWS.S3();
+
 
 export const verifyToken = (req: Request, res: Response, next: Function) => {
   const token = req.headers["authorization"]?.split(" ")[1];
@@ -30,6 +41,34 @@ export const verifyToken = (req: Request, res: Response, next: Function) => {
   }
 };
 
+// export const upload = multer({
+//   storage: multer.memoryStorage(),
+//   limits: {
+//     fileSize: 5 * 1024 * 1024, // limit file size to 5MB
+//   },
+// });
+
+// app.post('/upload', upload.single('file'), (req, res) => {
+//   if (!req.file) {
+//     return res.status(400).send('No file uploaded');
+//   }
+
+//   const params = {
+//     Bucket: 'your_bucket_name',
+//     Key: req.file.originalname,
+//     Body: req.file.buffer,
+//   };
+
+//   s3.upload(params, (err: any, data: any) => {
+//     if (err) {
+//       console.error(err);
+//       return res.status(500).send('Error uploading file');
+//     }
+
+//     res.send('File uploaded successfully');
+//   });
+// });
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads"); // Uploads is the folder where the image will be stored
@@ -41,4 +80,4 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + "-" + Date.now() + ".jpg");
   },
 });
-export const upload = multer({ storage: storage });
+//export const upload = multer({ storage: storage });
