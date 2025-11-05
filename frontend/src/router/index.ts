@@ -1,16 +1,16 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import HomeView from "../views/HomeView.vue";
 import HomeViewStudent from "../views/HomeView-Student.vue";
 import HomeViewTeacher from "../views/HomeView-Teacher.vue";
 import ComponenteRegistro from "@/components/ComponenteRegistro.vue";
 import MiComponenteLogin from "@/components/MiComponenteLogin.vue";
 import ComponenteOlvidoC from "@/components/ComponenteOlvidoC.vue";
-import ComponenteActivarCuenta from "@/components/ComponenteActivarCuenta.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "home",
-    component: MiComponenteLogin,
+    component: HomeView,
   },
   {
     path: "/home-student",
@@ -36,11 +36,6 @@ const routes: Array<RouteRecordRaw> = [
     path: "/olvidoContraseña",
     name: "ComponenteOlvidoC",
     component: ComponenteOlvidoC,
-  },
-  {
-    path: "/activarCuenta",
-    name: "ComponenteActivarCuenta",
-    component: ComponenteActivarCuenta,
   },
   {
     path: "/about",

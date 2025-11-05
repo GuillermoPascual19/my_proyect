@@ -1,4 +1,4 @@
-import { Optional } from "sequelize";
+import { DataTypes, Optional } from "sequelize";
 import {
   Table,
   Column,
@@ -6,8 +6,6 @@ import {
   DataType,
   PrimaryKey,
   AutoIncrement,
-  AllowNull,
-  Default,
 } from "sequelize-typescript";
 import sequelize from "../config/database";
 

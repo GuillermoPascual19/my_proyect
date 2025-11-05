@@ -1,32 +1,28 @@
+<!-- src/components/Subjects.vue -->
 <template>
-  <div class="app">
-    <div class="content-container">
-      <div class="fondo">
-        <h1 class="title">Student</h1>
-        <h3 class="subtitle">Asignaturas</h3>
-        <table class="subjects-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre de la Asignatura</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="subject in subjects" :key="subject.id">
-              <td>{{ subject.id }}</td>
-              <td>{{ subject.name }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="form-container">
-          <input
-            v-model="newSubject"
-            placeholder="Nueva Asignatura"
-            class="input-subject"
-          />
-          <button @click="addSubject" class="btn-add">Añadir Asignatura</button>
-        </div>
-      </div>
+  <div class="fondo">
+    <h1>Asignaturas</h1>
+    <table class="subjects-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre de la Asignatura</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="subject in subjects" :key="subject.id">
+          <td>{{ subject.id }}</td>
+          <td>{{ subject.name }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="form-container">
+      <input
+        v-model="newSubject"
+        placeholder="Nueva Asignatura"
+        class="input-subject"
+      />
+      <button @click="addSubject" class="btn-add">Añadir Asignatura</button>
     </div>
   </div>
 </template>
@@ -62,24 +58,9 @@ export default {
   },
 };
 </script>
+
 <style scoped>
-.app {
-  align-items: center;
-  display: flex-center;
-  justify-content: center;
-  min-width: auto;
-  width: 800px;
-  background-color: #f8f9fa;
-}
-
-.content-container {
-  flex-grow: 1;
-  padding: 20px;
-  transition: margin-left 0.3s;
-}
-
 .fondo {
-  flex: 1;
   margin: 3rem auto;
   display: flex;
   flex-direction: column;
@@ -93,13 +74,14 @@ export default {
   padding: 40px;
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
 }
+body {
+  background-color: #f0f0f0;
+  color: #333;
+  font-family: Arial, sans-serif;
+}
 
-.title {
-  text-align: center;
-  font-family: "Helvetica", sans-serif;
-  font-size: 60px;
-  font-weight: 800;
-  color: #45a049;
+h1 {
+  color: #555;
 }
 
 .subjects-table {
@@ -130,21 +112,18 @@ export default {
 
 .form-container {
   margin-top: 20px;
-  display: flex;
-  justify-content: space-between;
 }
 
 .input-subject {
-  flex: 1;
   padding: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin-right: 10px;
 }
 
 .btn-add {
   padding: 5px 10px;
+  margin-left: 10px;
   background-color: #4caf50;
   color: white;
   border: none;

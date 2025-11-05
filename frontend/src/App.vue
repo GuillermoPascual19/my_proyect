@@ -1,18 +1,10 @@
 <template>
-  <div id="app">
-    <SidebarComponent />
-    <div class="content">
-      <nav>
-        <router-link to="/login">Home</router-link> |
-        <router-link to="/home-teacher">Home-Teacher</router-link> |
-        <router-link to="/home-student">Home-Student</router-link> |
-        <router-link to="/activarCuenta">Activar cuenta</router-link> |
-        <router-link to="/about">About</router-link>
-      </nav>
-      <router-view />
-      <FooterComponent />
-    </div>
-  </div>
+  <nav>
+    <router-link to="/">Home</router-link> |
+    <router-link to="/login">Login</router-link> |
+    <router-link to="/about">About</router-link>
+  </nav>
+  <router-view />
 </template>
 
 <script>

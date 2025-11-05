@@ -1,4 +1,4 @@
-import { Optional } from 'sequelize';
+import { DataTypes, Optional } from 'sequelize';
 import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
 import sequelize from '../config/database';
 
@@ -14,7 +14,7 @@ interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
   timestamps: false, // Desactivar timestamps a nivel de tabla
   tableName: 'Roles',
 })
-export class Roles extends Model<Roles, UserCreationAttributes> {
+export class Students_teachers extends Model<Students_teachers, UserCreationAttributes> {
   @PrimaryKey
   @AutoIncrement
   @Column({
@@ -31,4 +31,4 @@ export class Roles extends Model<Roles, UserCreationAttributes> {
 
 }
 
-export default Roles;
+export default Students_teachers;
