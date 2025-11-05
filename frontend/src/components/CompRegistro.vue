@@ -72,7 +72,7 @@
           />
         </div>
         <div class="form-group">
-          <label class="form-label-role">Role</label>
+          <label class="form-label">Role</label>
           <flowbite-themable :theme="theme">
             <fwb-select
               text="Role"
@@ -103,7 +103,7 @@
 <script>
 import { FwbSelect } from "flowbite-vue";
 //import { ref } from "vue";
-import authService from "../services/auth/auth.service";
+import authService from "../services/auth.service";
 
 export default {
   name: "ComponenteRegistro",

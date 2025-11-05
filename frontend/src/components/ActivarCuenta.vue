@@ -1,60 +1,61 @@
 <template>
-  <div class="fondo">
-    <h1 class="title">¡Activa tu cuenta!</h1>
-    <div class="form-group">
-      <label class="form-label" for="access_token">
-        Introduce tu access Token:
-      </label>
-      <input
-        class="form-input"
-        type="text"
-        id="access_token"
-        v-model="access_token"
-      />
+  <div class="app">
+    <div class="fondo">
+      <h1 class="title">¡Activa tu cuenta!</h1>
+      <div class="form-group">
+        <label class="form-label" for="access_token">
+          Introduce tu access Token:
+        </label>
+        <input
+          class="form-input"
+          type="text"
+          id="access_token"
+          v-model="access_token"
+        />
+      </div>
+      <button class="btn-add" @click="activateAccount">Activar cuenta</button>
     </div>
-    <button class="btn-add" @click="activateAccount">Activar cuenta</button>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
-import userService from "../services/user/user.service";
+import userService from "../services/user.service";
 
 export default {
   data: () => ({
-    icons: [
-      "fab fa-facebook",
-      "fab fa-twitter",
-      "fab fa-google-plus",
-      "fab fa-linkedin",
-      "fab fa-instagram",
-    ],
+    access_token: "",
   }),
-  setup() {
-    const user = ref([]);
-    const access_token = ref("");
-    const activateAccount = async () => {
+  methods: {
+    async activateAccount() {
+      if (!this.access_token) {
+        console.log("access_token is required");
+        console.error("access_token is required");
+      }
       try {
         const response = await userService.activateAccount({
           access_token: this.access_token,
         });
-        user.value = response.data;
+        const user = response.data;
+        console.log("Usuario activado: ", user);
         this.$router.push("/login");
       } catch (error) {
-        console.error("Error al obtener las asignaturas:", error);
+        console.log("Error al activar la cuenta :");
+        console.error("Error al activar la cuenta :");
       }
-    };
-
-    return {
-      access_token,
-      activateAccount,
-      user,
-    };
+    },
   },
 };
 </script>
 
 <style scoped>
+.app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90vh;
+  background-color: #f8f9fa;
+  margin: 0;
+}
 html,
 body {
   height: 100%;
@@ -64,25 +65,15 @@ body {
 }
 
 .fondo {
-  flex: 1;
   margin: 3rem auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 20%;
-  min-width: 800px;
-  min-height: 500px;
-  max-width: 100%;
+  width: 800px;
   background: rgba(19, 35, 47, 0.9);
   border-radius: 5px;
-  padding: 40px;
+  padding: 30px;
   box-shadow: 0 4px 10px 4px rgba(0, 0, 0, 0.3);
-}
-
-.footer-container {
-  display: flex;
-  width: 100%;
-  margin-top: auto;
 }
 
 .title {
@@ -91,7 +82,7 @@ body {
   font-size: 60px;
   font-weight: 800;
   color: #45a049;
-  margin-bottom: 5rem;
+  margin-bottom: 20px;
 }
 
 body {
@@ -117,6 +108,7 @@ h1 {
   margin-top: 1rem;
   color: white;
   margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 .form-input {

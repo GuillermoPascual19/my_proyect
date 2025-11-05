@@ -1,6 +1,16 @@
-import { DataTypes, Optional } from 'sequelize';
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
-import sequelize from '../config/database';
+import { DataTypes, Optional } from "sequelize";
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  PrimaryKey,
+  AutoIncrement,
+  ForeignKey,
+  BelongsTo,
+} from "sequelize-typescript";
+import sequelize from "../config/database";
+import User from "./user";
 
 // Definir los atributos que tendrá el modelo User
 interface UserAttributes {
@@ -10,33 +20,35 @@ interface UserAttributes {
 }
 
 // Define una interfaz para la creación de usuarios
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
 
 @Table({
   timestamps: false, // Desactivar timestamps a nivel de tabla
-  tableName: 'Sessions',
+  tableName: "Sessions",
 })
-export class Students_teachers extends Model<Students_teachers, UserCreationAttributes> {
+export class Session extends Model<Session, UserCreationAttributes> {
   @PrimaryKey
   @AutoIncrement
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
-  id!: number;
+  declare id: number;
 
+  @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   id_user!: number;
+  @BelongsTo(() => User, { foreignKey: "id_user", as: "userSession" })
+  users!: User;
 
   @Column({
     type: DataType.DATE,
     allowNull: false,
   })
   signed_at!: Date;
-
 }
 
-export default Students_teachers;
+export default Session;

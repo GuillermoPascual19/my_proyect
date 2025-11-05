@@ -1,6 +1,7 @@
-import { DataTypes, Optional } from 'sequelize';
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement } from 'sequelize-typescript';
+import { Optional } from 'sequelize';
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, HasMany } from 'sequelize-typescript';
 import sequelize from '../config/database';
+import User from './user';
 
 // Definir los atributos que tendrá el modelo User
 interface UserAttributes {
@@ -17,11 +18,11 @@ interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
 export class Students_teachers extends Model<Students_teachers, UserCreationAttributes> {
   @PrimaryKey
   @AutoIncrement
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  id!: number;
+  @Column({})
+  declare id: number;
+
+  @HasMany(() => User, { foreignKey: "role", as: "roles" })
+  roles!: User[];
 
   @Column({
     type: DataType.STRING,

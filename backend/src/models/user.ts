@@ -6,8 +6,16 @@ import {
   DataType,
   PrimaryKey,
   AutoIncrement,
+  AllowNull,
+  Default,
+  ForeignKey,
+  BelongsTo,
+  HasMany,
 } from "sequelize-typescript";
 import sequelize from "../config/database";
+import Students_teachers from "./students-teachers";
+import Session from "./session";
+import Roles from "./roles";
 
 // Definir los atributos que tendrá el modelo User
 interface UserAttributes {
@@ -20,7 +28,8 @@ interface UserAttributes {
   access_token: string;
   password_token: string;
   role: string;
-  active: number;
+  active: boolean;
+  image: string;
 }
 
 // Define una interfaz para la creación de usuarios
@@ -31,11 +40,20 @@ interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
   tableName: "Users",
 })
 export class User extends Model<User, UserCreationAttributes> {
+  [x: string]: any;
   @PrimaryKey
   @AutoIncrement
-  @Column({
-  })
-  id!: number;
+  @Column({})
+  declare id: number;
+
+  @HasMany(() => Session, { foreignKey: "id_user", as: "userSession" })
+  userSession!: Session[];
+
+  @HasMany(() => Students_teachers, { foreignKey: "id_student", as: "studentTeachers" })
+  studentTeachers!: Students_teachers[];
+
+  @HasMany(() => Students_teachers, { foreignKey: "id_teacher", as: "teacherStudents" })
+  teacherStudents!: Students_teachers[];
 
   @Column({
     type: DataType.STRING,
@@ -79,17 +97,32 @@ export class User extends Model<User, UserCreationAttributes> {
   })
   password_token!: string;
 
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
-  role!: string;
-
+  @ForeignKey(() => Roles)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
-  active!: number;
+  role!: number;
+  @BelongsTo(() => Roles, { foreignKey: "role", as: "roles" })
+  roles!: Roles;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+  })
+  active!: boolean;
+
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  image!: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  id_google!: string;
 }
 
 export default User;

@@ -18,4 +18,7 @@ app.use(morgan("dev"));
 
 app.use("/api", userRoutes);
 
+// Send static files in uploads folder
+app.use("/uploads", express.static("uploads"));
+
 export default app;
